@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import {
   FormControl,
   FormLabel,
@@ -7,7 +8,8 @@ import {
   HStack,
   IconButton,
   useToast,
-  useColorModeValue
+  useColorModeValue,
+  Box,
 } from '@chakra-ui/react';
 import { FaStar, FaRegStar } from 'react-icons/fa';
 import CreatableSelect from 'react-select/creatable';
@@ -51,6 +53,7 @@ const VideoForm: React.FC<VideoFormProps> = ({
 
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const textMuted = useColorModeValue('gray.500', 'gray.400');
 
   // Load tags, people, locations, events, and shoeboxes options
   useEffect(() => {
@@ -94,15 +97,22 @@ const VideoForm: React.FC<VideoFormProps> = ({
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(
-        <IconButton
+        <motion.div
           key={i}
-          icon={i <= (formData.rating || 0) ? <FaStar /> : <FaRegStar />}
-          aria-label={`${i} star`}
-          variant="ghost"
-          color={i <= (formData.rating || 0) ? 'yellow.400' : 'gray.400'}
-          isDisabled={readOnly}
-          onClick={() => !readOnly && handleRatingChange(i)}
-        />
+          whileHover={{ scale: 1.3 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <IconButton
+            icon={i <= (formData.rating || 0) ? <FaStar /> : <FaRegStar />}
+            aria-label={`${i} star`}
+            variant="ghost"
+            color={i <= (formData.rating || 0) ? 'yellow.400' : textMuted}
+            isDisabled={readOnly}
+            onClick={() => !readOnly && handleRatingChange(i)}
+            borderRadius="full"
+            _hover={{ bg: 'transparent' }}
+          />
+        </motion.div>
       );
     }
     return <HStack spacing={1}>{stars}</HStack>;
@@ -114,35 +124,46 @@ const VideoForm: React.FC<VideoFormProps> = ({
       ...base,
       background: bgColor,
       borderColor: borderColor,
+      borderRadius: 'xl',
+      transition: 'all 0.2s ease',
     }),
     menu: (base: any) => ({
       ...base,
       background: bgColor,
+      borderRadius: 'xl',
       zIndex: 2
     }),
     option: (base: any, state: any) => ({
       ...base,
       backgroundColor: state.isFocused
-        ? useColorModeValue('blue.50', 'blue.900')
-        : useColorModeValue('white', 'gray.700'),
-      color: useColorModeValue('black', 'black')
-    })
+        ? useColorModeValue('brand.100', 'brand.900')
+        : bgColor,
+      color: useColorModeValue('gray.900', 'gray.100'),
+      borderRadius: 'lg',
+    }),
   };
 
   return (
-    <>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <FormControl>
-        <FormLabel>Title</FormLabel>
+        <FormLabel fontWeight="500">Title</FormLabel>
         {readOnly ? (
           <Input
             value={formData.title}
             isReadOnly={true}
+            borderRadius="xl"
           />
         ) : (
           <Input
             value={formData.title}
             onChange={(e) => onChange({ title: e.target.value })}
             placeholder="Enter title"
+            borderRadius="xl"
+            variant="outlined"
           />
         )}
       </FormControl>
@@ -392,7 +413,7 @@ const VideoForm: React.FC<VideoFormProps> = ({
           }}
         />
       </FormControl>
-    </>
+    </motion.div>
   );
 };
 
