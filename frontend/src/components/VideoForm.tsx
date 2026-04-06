@@ -9,7 +9,6 @@ import {
   IconButton,
   useToast,
   useColorModeValue,
-  Box,
 } from '@chakra-ui/react';
 import { FaStar, FaRegStar } from 'react-icons/fa';
 import CreatableSelect from 'react-select/creatable';
