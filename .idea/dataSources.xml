@@ -10,14 +10,6 @@
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
-      <libraries>
-        <library>
-          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.45.1/org/xerial/sqlite-jdbc/3.45.1.0/sqlite-jdbc-3.45.1.0.jar</url>
-        </library>
-        <library>
-          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.45.1/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar</url>
-        </library>
-      </libraries>
     </data-source>
     <data-source source="LOCAL" name="shoebox-dev@10.21.20.229" uuid="aec532a3-bead-4750-a0ec-2e87a7e8d3c3">
       <driver-ref>postgresql</driver-ref>

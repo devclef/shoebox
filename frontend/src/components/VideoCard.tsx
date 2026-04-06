@@ -5,13 +5,14 @@ import {
   Text,
   Heading,
   Badge,
-  Flex,
   useColorModeValue,
   HStack,
-  Icon
+  Icon,
+  Stack,
 } from '@chakra-ui/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link as RouterLink } from 'react-router-dom';
-import { FaStar, FaRegStar } from 'react-icons/fa';
+import { FaStar, FaRegStar, FaClock } from 'react-icons/fa';
 import { VideoWithMetadata } from '../api/client';
 
 interface VideoCardProps {
@@ -20,8 +21,7 @@ interface VideoCardProps {
 
 const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
   const cardBg = useColorModeValue('white', 'gray.800');
-  const cardBorder = useColorModeValue('gray.200', 'gray.700');
-
+  const textMuted = useColorModeValue('gray.500', 'gray.400');
 
   // Format date
   const formatDate = (dateString?: string): string => {
@@ -29,7 +29,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return 'Unknown date';
-      return date.toLocaleDateString();
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     } catch (e) {
       return 'Unknown date';
     }
@@ -60,86 +60,156 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
         <Icon
           key={i}
           as={i <= rating ? FaStar : FaRegStar}
-          color={i <= rating ? 'yellow.400' : 'gray.400'}
-          boxSize={3}
+          color={i <= rating ? 'yellow.400' : textMuted}
+          boxSize={3.5}
         />
       );
     }
 
     return (
-      <HStack spacing={1} mt={1}>
+      <HStack spacing={0.5} mt={2}>
         {stars}
       </HStack>
     );
   };
 
   return (
-    <Box
-      as={RouterLink}
-      to={`/videos/${video.id}`}
-      borderWidth="1px"
-      borderRadius="lg"
-      overflow="hidden"
-      bg={cardBg}
-      borderColor={cardBorder}
-      transition="all 0.2s"
-      _hover={{ transform: 'translateY(-4px)', shadow: 'md' }}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
     >
-      <Image
-        src={video.thumbnail_path || '/placeholder-thumbnail.jpg'}
-        alt={video.title || video.file_name}
-        height="180px"
-        width="100%"
-        objectFit="cover"
-        fallbackSrc="/placeholder-thumbnail.jpg"
-      />
+      <Box
+        as={RouterLink}
+        to={`/videos/${video.id}`}
+        borderRadius="2xl"
+        overflow="hidden"
+        bg={cardBg}
+        boxShadow="card"
+        position="relative"
+        _before={video.rating ? {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          zIndex: 1,
+          bg: 'linear-gradient(135deg, transparent 0%, yellow.400 100%)',
+          width: '40px',
+          height: '40px',
+          borderRadius: '0 12px 0 100%',
+        } : {} as React.CSSProperties}
+      >
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+        >
+          <Box
+            position="relative"
+            overflow="hidden"
+            height="180px"
+            borderRadius="2xl 2xl 0 0"
+          >
+            <Image
+              src={video.thumbnail_path || '/placeholder-thumbnail.jpg'}
+              alt={video.title || video.file_name}
+              width="100%"
+              objectFit="cover"
+              fallbackSrc="/placeholder-thumbnail.jpg"
+            />
+            <Box
+              position="absolute"
+              bottom={0}
+              left={0}
+              right={0}
+              p={2}
+              bg="linear-gradient(transparent, rgba(0,0,0,0.7))"
+              display="flex"
+              alignItems="center"
+              gap={1}
+            >
+              <Icon as={FaClock} color="white" boxSize={3} />
+              <Text fontSize="xs" color="white" fontWeight="500">
+                {video.duration ? formatDuration(video.duration) : 'Unknown duration'}
+              </Text>
+            </Box>
+          </Box>
+        </motion.div>
 
-      <Box p={4}>
-        <Heading size="md" noOfLines={1} mb={2}>
-          {video.title || video.file_name}
-        </Heading>
+        <Box p={4}>
+          <Heading size="md" noOfLines={2} mb={1} fontWeight="600">
+            {video.title || video.file_name}
+          </Heading>
 
-        {renderRating(video.rating)}
+          {renderRating(video.rating)}
 
-        <Text fontSize="sm" color="gray.500" mt={2} noOfLines={1}>
-          {formatDate(video.created_date)}
-        </Text>
+          <Text fontSize="sm" color={textMuted} mt={2}>
+            {formatDate(video.created_date)}
+          </Text>
 
-        <Flex fontSize="sm" color="gray.500" noOfLines={1} justifyContent="space-between">
-          <Text>{video.duration ? formatDuration(video.duration) : 'Unknown duration'}</Text>
-        </Flex>
-
-        {video.tags.length > 0 && (
-          <Flex mt={3} flexWrap="wrap" gap={2}>
-            {video.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} colorScheme="blue" fontSize="xs" color="white">
-                {tag}
-              </Badge>
-            ))}
-            {video.tags.length > 3 && (
-              <Badge colorScheme="gray" fontSize="xs" color="white">
-                +{video.tags.length - 3} more
-              </Badge>
+          <AnimatePresence>
+            {(video.tags.length > 0 || video.people.length > 0) && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                transition={{ duration: 0.2 }}
+              >
+                <Stack direction="row" flexWrap="wrap" gap={2} mt={3}>
+                  {video.tags.slice(0, 3).map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="gradient"
+                      fontSize="xs"
+                      px={2}
+                      py={1}
+                      borderRadius="full"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                  {video.tags.length > 3 && (
+                    <Badge
+                      colorScheme="gray"
+                      fontSize="xs"
+                      px={2}
+                      py={1}
+                      borderRadius="full"
+                      variant="subtle"
+                    >
+                      +{video.tags.length - 3}
+                    </Badge>
+                  )}
+                  {video.people.slice(0, 2).map((person) => (
+                    <Badge
+                      key={person}
+                      bg="linear-gradient(135deg, green.400, green.600)"
+                      fontSize="xs"
+                      color="white"
+                      px={2}
+                      py={1}
+                      borderRadius="full"
+                    >
+                      {person}
+                    </Badge>
+                  ))}
+                  {video.people.length > 2 && (
+                    <Badge
+                      colorScheme="gray"
+                      fontSize="xs"
+                      px={2}
+                      py={1}
+                      borderRadius="full"
+                      variant="subtle"
+                    >
+                      +{video.people.length - 2}
+                    </Badge>
+                  )}
+                </Stack>
+              </motion.div>
             )}
-          </Flex>
-        )}
-
-        {video.people.length > 0 && (
-          <Flex mt={2} flexWrap="wrap" gap={2}>
-            {video.people.slice(0, 2).map((person) => (
-              <Badge key={person} colorScheme="green" fontSize="xs" color="white">
-                {person}
-              </Badge>
-            ))}
-            {video.people.length > 2 && (
-              <Badge colorScheme="gray" fontSize="xs" color="white">
-                +{video.people.length - 2} more
-              </Badge>
-            )}
-          </Flex>
-        )}
+          </AnimatePresence>
+        </Box>
       </Box>
-    </Box>
+    </motion.div>
   );
 };
 
