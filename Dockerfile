@@ -15,7 +15,7 @@ COPY frontend/ ./
 RUN yarn run build
 
 # Stage 2: Build the Rust backend
-FROM rust:latest AS backend-builder
+FROM rust:bookworm AS backend-builder
 WORKDIR /app
 # Install dependencies for building
 RUN apt-get update && apt-get install -y \
