@@ -242,12 +242,7 @@ impl ScannerService {
         let mut buffer = [0u8; 8]; // 8 bytes for atom size (4) and type (4)
 
         // We'll search the entire file for the moov atom
-        loop {
-            // Read atom header
-            match reader.read_exact(&mut buffer) {
-                Ok(_) => {},
-                Err(_) => break, // End of file or error
-            }
+        while let Ok(_) = reader.read_exact(&mut buffer) {
 
             // Parse atom size (big-endian)
             let size = ((buffer[0] as u32) << 2) |
