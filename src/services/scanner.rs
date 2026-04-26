@@ -240,7 +240,6 @@ impl ScannerService {
         // Read the file to find the moov atom and extract duration
         let mut reader = std::io::BufReader::new(file);
         let mut buffer = [0u8; 8]; // 8 bytes for atom size (4) and type (4)
-        let mut position = 0;
 
         // We'll search the entire file for the moov atom
         loop {
@@ -332,7 +331,7 @@ impl ScannerService {
                 // Skip the rest of this atom (size - 8 bytes we already read)
                 let to_skip = size as u64 - 8;
                 match reader.seek(SeekFrom::Current(to_skip as i64)) {
-                    Ok(new_pos) => position = new_pos,
+                    Ok(_) => {},
                     Err(_) => break, // Error seeking
                 }
             } else if size == 0 {
