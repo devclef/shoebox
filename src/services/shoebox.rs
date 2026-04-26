@@ -1,5 +1,5 @@
 use sqlx::{Pool, Postgres, Transaction, Row};
-use tracing::{info, warn};
+use tracing::info;
 use uuid::Uuid;
 
 use crate::error::{AppError, Result};
@@ -36,6 +36,7 @@ impl ShoeboxService {
         Ok(shoebox)
     }
 
+    #[allow(dead_code)]
     pub async fn find_by_name(&self, name: &str) -> Result<Shoebox> {
         let shoebox = sqlx::query_as::<_, Shoebox>("SELECT * FROM shoeboxes WHERE name = $1")
             .bind(name)
@@ -76,8 +77,8 @@ impl ShoeboxService {
             .bind(&id)
             .bind(name)
             .bind(description)
-            .bind(&now)
-            .bind(&now)
+            .bind(now)
+            .bind(now)
             .execute(&mut **tx)
             .await
             .map_err(AppError::Database)?;
@@ -104,8 +105,8 @@ impl ShoeboxService {
             .bind(&shoebox.id)
             .bind(&shoebox.name)
             .bind(&shoebox.description)
-            .bind(&shoebox.created_at)
-            .bind(&shoebox.updated_at)
+            .bind(shoebox.created_at)
+            .bind(shoebox.updated_at)
             .execute(&self.db)
             .await
             .map_err(AppError::Database)?;
@@ -137,7 +138,7 @@ impl ShoeboxService {
         sqlx::query("UPDATE shoeboxes SET name = $1, description = $2, updated_at = $3 WHERE id = $4")
             .bind(name)
             .bind(description)
-            .bind(&now)
+            .bind(now)
             .bind(id)
             .execute(&self.db)
             .await
@@ -277,6 +278,7 @@ impl ShoeboxService {
         Ok(video_ids)
     }
 
+    #[allow(dead_code)]
     pub async fn get_shoeboxes_for_video(&self, video_id: &str) -> Result<Vec<Shoebox>> {
         let shoeboxes = sqlx::query_as::<_, Shoebox>(
             "SELECT s.* FROM shoeboxes s

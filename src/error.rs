@@ -24,6 +24,7 @@ pub enum AppError {
     BadRequest(String),
 
     #[error("Unauthorized: {0}")]
+    #[allow(dead_code)]
     Unauthorized(String),
 
     #[error("Internal server error: {0}")]

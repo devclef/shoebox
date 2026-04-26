@@ -1,6 +1,5 @@
 use sqlx::{Pool, Postgres, Row};
 use tracing::info;
-use uuid::Uuid;
 
 use crate::error::{AppError, Result};
 

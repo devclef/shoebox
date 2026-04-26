@@ -1,11 +1,9 @@
 use std::path::{Path, PathBuf};
-use std::time::SystemTime;
 use tokio::fs;
 use walkdir::WalkDir;
 use tracing::{info, warn, error};
 use anyhow::Result;
 use std::io::{Read, Seek, SeekFrom};
-use std::process::Command;
 use tokio::task;
 use tokio::process::Command as TokioCommand;
 use std::sync::Arc;
@@ -242,7 +240,7 @@ impl ScannerService {
         let mut buffer = [0u8; 8]; // 8 bytes for atom size (4) and type (4)
 
         // We'll search the entire file for the moov atom
-        while let Ok(_) = reader.read_exact(&mut buffer) {
+        while reader.read_exact(&mut buffer).is_ok() {
 
             // Parse atom size (big-endian)
             let size = ((buffer[0] as u32) << 2) |
@@ -722,6 +720,7 @@ impl ScannerService {
         Ok(video_files)
     }
 
+    #[allow(dead_code)]
     pub fn is_video_file(path: &Path) -> bool {
         if let Some(ext) = path.extension() {
             let ext = ext.to_string_lossy().to_lowercase();
@@ -732,6 +731,7 @@ impl ScannerService {
 }
 
 // Utility function for Path to String conversion
+#[allow(dead_code)]
 pub fn path_to_string(path: &Path) -> String {
     path.to_string_lossy().to_string()
 }

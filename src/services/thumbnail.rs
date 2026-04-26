@@ -9,6 +9,7 @@ use crate::config::Config;
 
 pub struct ThumbnailService {
     thumbnail_dir: PathBuf,
+    #[allow(dead_code)]
     web_path: String,
 }
 
@@ -25,8 +26,7 @@ impl ThumbnailService {
         // Ensure thumbnail directory exists
         if !self.thumbnail_dir.exists() {
             fs::create_dir_all(&self.thumbnail_dir).await.map_err(|e| {
-                AppError::Io(std::io::Error::new(
-                    std::io::ErrorKind::Other,
+                AppError::Io(std::io::Error::other(
                     format!("Failed to create thumbnail directory: {e}"),
                 ))
             })?;

@@ -342,12 +342,7 @@ fn check_mp4_structure(path: &PathBuf) -> bool {
     let search_limit = 1024 * 1024;
 
     if position < search_limit {
-        loop {
-            // Read atom header
-            match reader.read_exact(&mut buffer) {
-                Ok(_) => {},
-                Err(_) => break, // End of file or error
-            }
+        while reader.read_exact(&mut buffer).is_ok() {
 
             // Parse atom size (big-endian)
             let size = ((buffer[0] as u32) << 24) |
@@ -395,7 +390,7 @@ fn get_mp4_duration(path: &PathBuf) -> Option<f64> {
     let mut buffer = [0u8; 8]; // 8 bytes for atom size (4) and type (4)
 
     // We'll search the entire file for the moov atom
-    while let Ok(_) = reader.read_exact(&mut buffer) {
+    while reader.read_exact(&mut buffer).is_ok() {
 
         // Parse atom size (big-endian)
         let size = ((buffer[0] as u32) << 24) |

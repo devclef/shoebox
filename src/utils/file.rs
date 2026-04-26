@@ -5,17 +5,20 @@ use tracing::error;
 use crate::error::{AppError, Result};
 
 /// Check if a file exists
+#[allow(dead_code)]
 pub async fn file_exists(path: &Path) -> bool {
     fs::metadata(path).await.is_ok()
 }
 
 /// Get file extension as lowercase string
+#[allow(dead_code)]
 pub fn get_file_extension(path: &Path) -> Option<String> {
     path.extension()
         .map(|ext| ext.to_string_lossy().to_lowercase())
 }
 
 /// Check if a file is a video file
+#[allow(dead_code)]
 pub fn is_video_file(path: &Path) -> bool {
     if let Some(ext) = get_file_extension(path) {
         return ["mp4", "mov", "mkv"].contains(&ext.as_str());
@@ -24,11 +27,11 @@ pub fn is_video_file(path: &Path) -> bool {
 }
 
 /// Create directory if it doesn't exist
+#[allow(dead_code)]
 pub async fn ensure_dir_exists(path: &Path) -> Result<()> {
     if !path.exists() {
         fs::create_dir_all(path).await.map_err(|e| {
-            AppError::Io(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            AppError::Io(std::io::Error::other(
                 format!("Failed to create directory {}: {e}", path.display()),
             ))
         })?;
@@ -37,6 +40,7 @@ pub async fn ensure_dir_exists(path: &Path) -> Result<()> {
 }
 
 /// Get a unique filename in a directory
+#[allow(dead_code)]
 pub async fn get_unique_filename(dir: &Path, base_name: &str, extension: &str) -> Result<PathBuf> {
     let mut counter = 0;
     let mut file_name = format!("{}.{}", base_name, extension);
@@ -52,6 +56,7 @@ pub async fn get_unique_filename(dir: &Path, base_name: &str, extension: &str) -
 }
 
 /// Copy a file with error handling
+#[allow(dead_code)]
 pub async fn copy_file(source: &Path, dest: &Path) -> Result<()> {
     if !source.exists() {
         return Err(AppError::NotFound(format!(

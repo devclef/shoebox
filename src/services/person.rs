@@ -1,5 +1,5 @@
 use sqlx::{Pool, Postgres, Transaction, Row};
-use tracing::{info, warn};
+use tracing::info;
 use uuid::Uuid;
 
 use crate::error::{AppError, Result};
@@ -36,6 +36,7 @@ impl PersonService {
         Ok(person)
     }
 
+    #[allow(dead_code)]
     pub async fn find_by_name(&self, name: &str) -> Result<Person> {
         let person = sqlx::query_as::<_, Person>("SELECT * FROM people WHERE name = $1")
             .bind(name)
@@ -74,7 +75,7 @@ impl PersonService {
         sqlx::query("INSERT INTO people (id, name, created_at) VALUES ($1, $2, $3)")
             .bind(&id)
             .bind(name)
-            .bind(&now)
+            .bind(now)
             .execute(&mut **tx)
             .await
             .map_err(AppError::Database)?;
@@ -100,7 +101,7 @@ impl PersonService {
         sqlx::query("INSERT INTO people (id, name, created_at) VALUES ($1, $2, $3)")
             .bind(&person.id)
             .bind(&person.name)
-            .bind(&person.created_at)
+            .bind(person.created_at)
             .execute(&self.db)
             .await
             .map_err(AppError::Database)?;

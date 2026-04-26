@@ -48,8 +48,7 @@ fn ensure_migrations_dir() -> Result<()> {
     if !migrations_dir.exists() {
         info!("Creating migrations dir");
         fs::create_dir_all(migrations_dir).map_err(|e| {
-            AppError::Io(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            AppError::Io(std::io::Error::other(
                 format!("Failed to create migrations directory: {e}"),
             ))
         })?;

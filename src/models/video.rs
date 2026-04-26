@@ -99,6 +99,7 @@ pub struct ExportRequest {
 }
 
 impl Video {
+    #[allow(dead_code)]
     pub fn new(file_path: String, file_name: String) -> Self {
         let now = Utc::now().naive_utc();
         Self {
@@ -116,7 +117,7 @@ impl Video {
             exif_data: None,
             location: None,
             event: None,
-            created_at: now.clone(),
+            created_at: now,
             updated_at: now,
         }
     }

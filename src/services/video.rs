@@ -161,15 +161,15 @@ impl VideoService {
         .bind(&dto.title)
         .bind(&dto.description)
         .bind(&dto.created_date)
-        .bind(&dto.file_size)
+        .bind(dto.file_size)
         .bind(&dto.thumbnail_path)
-        .bind(&dto.rating)
-        .bind(&dto.duration)
+        .bind(dto.rating)
+        .bind(dto.duration)
         .bind(&dto.original_file_path)
         .bind(&dto.location)
         .bind(&dto.event)
-        .bind(&now)
-        .bind(&now)
+        .bind(now)
+        .bind(now)
         .execute(&mut *tx)
         .await
         .map_err(AppError::Database)?;
@@ -181,7 +181,7 @@ impl VideoService {
             sqlx::query("INSERT INTO video_tags (video_id, tag_id, created_at) VALUES ($1, $2, $3::timestamp)")
                 .bind(&id)
                 .bind(&tag_id)
-                .bind(&now)
+                .bind(now)
                 .execute(&mut *tx)
                 .await
                 .map_err(AppError::Database)?;
@@ -194,7 +194,7 @@ impl VideoService {
             sqlx::query("INSERT INTO video_people (video_id, person_id, created_at) VALUES ($1, $2, $3::timestamp)")
                 .bind(&id)
                 .bind(&person_id)
-                .bind(&now)
+                .bind(now)
                 .execute(&mut *tx)
                 .await
                 .map_err(AppError::Database)?;
@@ -207,7 +207,7 @@ impl VideoService {
             sqlx::query("INSERT INTO video_shoeboxes (video_id, shoebox_id, created_at) VALUES ($1, $2, $3::timestamp)")
                 .bind(&id)
                 .bind(&shoebox_id)
-                .bind(&now)
+                .bind(now)
                 .execute(&mut *tx)
                 .await
                 .map_err(AppError::Database)?;
@@ -291,7 +291,7 @@ impl VideoService {
                 sqlx::query("INSERT INTO video_tags (video_id, tag_id, created_at) VALUES ($1, $2, $3::timestamp)")
                     .bind(id)
                     .bind(&tag_id)
-                    .bind(&now)
+                    .bind(now)
                     .execute(&mut *tx)
                     .await
                     .map_err(AppError::Database)?;
@@ -314,7 +314,7 @@ impl VideoService {
                 sqlx::query("INSERT INTO video_people (video_id, person_id, created_at) VALUES ($1, $2, $3::timestamp)")
                     .bind(id)
                     .bind(&person_id)
-                    .bind(&now)
+                    .bind(now)
                     .execute(&mut *tx)
                     .await
                     .map_err(AppError::Database)?;
@@ -337,7 +337,7 @@ impl VideoService {
                 sqlx::query("INSERT INTO video_shoeboxes (video_id, shoebox_id, created_at) VALUES ($1, $2, $3::timestamp)")
                     .bind(id)
                     .bind(&shoebox_id)
-                    .bind(&now)
+                    .bind(now)
                     .execute(&mut *tx)
                     .await
                     .map_err(AppError::Database)?;
@@ -350,6 +350,7 @@ impl VideoService {
         self.find_by_id(id).await
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub async fn update_technical_metadata(&self, id: &str, file_size: Option<i64>, duration: Option<i64>, created_date: Option<String>, thumbnail_path: Option<String>, original_file_path: Option<String>, exif_data: Option<serde_json::Value>) -> Result<Video> {
         let mut tx = self.db.begin().await.map_err(AppError::Database)?;
 

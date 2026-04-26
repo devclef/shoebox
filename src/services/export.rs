@@ -6,10 +6,11 @@ use serde_json::json;
 
 use crate::error::{AppError, Result};
 use crate::config::Config;
-use crate::models::{ExportRequest, VideoWithMetadata};
+use crate::models::ExportRequest;
 use crate::services::video::VideoService;
 
 pub struct ExportService {
+    #[allow(dead_code)]
     config: Config,
     video_service: VideoService,
     export_base_path: PathBuf,
@@ -34,8 +35,7 @@ impl ExportService {
         // Ensure export base directory exists
         if !self.export_base_path.exists() {
             fs::create_dir_all(&self.export_base_path).await.map_err(|e| {
-                AppError::Io(std::io::Error::new(
-                    std::io::ErrorKind::Other,
+                AppError::Io(std::io::Error::other(
                     format!("Failed to create export directory: {e}"),
                 ))
             })?;
@@ -43,8 +43,7 @@ impl ExportService {
 
         // Create project directory
         fs::create_dir_all(&project_dir).await.map_err(|e| {
-            AppError::Io(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            AppError::Io(std::io::Error::other(
                 format!("Failed to create project directory: {e}"),
             ))
         })?;
@@ -130,8 +129,7 @@ impl ExportService {
         })?;
 
         fs::write(&metadata_path, metadata_json).await.map_err(|e| {
-            AppError::Io(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            AppError::Io(std::io::Error::other(
                 format!("Failed to write metadata file: {e}"),
             ))
         })?;
