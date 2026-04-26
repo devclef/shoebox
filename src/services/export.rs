@@ -68,22 +68,19 @@ impl ExportService {
         // Copy videos to export directory
         for video_metadata in &videos_with_metadata {
             // Determine source path based on configuration
-            let source_path = if request.use_original_files && video_metadata.video.original_file_path.is_some() {
-                Path::new(video_metadata.video.original_file_path.as_ref().unwrap())
-            } else {
-                Path::new(&video_metadata.video.file_path)
+            let source_path = match video_metadata.video.original_file_path.as_ref() {
+                Some(original) if request.use_original_files => Path::new(original),
+                _ => Path::new(&video_metadata.video.file_path),
             };
 
             // Determine destination file name
-            let dest_file_name = if request.use_original_files && video_metadata.video.original_file_path.is_some() {
-                // Extract the file name from the original file path
-                Path::new(video_metadata.video.original_file_path.as_ref().unwrap())
+            let dest_file_name = match video_metadata.video.original_file_path.as_ref() {
+                Some(original) if request.use_original_files => Path::new(original)
                     .file_name()
                     .unwrap_or_else(|| std::ffi::OsStr::new(&video_metadata.video.file_name))
                     .to_string_lossy()
-                    .to_string()
-            } else {
-                video_metadata.video.file_name.clone()
+                    .to_string(),
+                _ => video_metadata.video.file_name.clone(),
             };
 
             let dest_path = project_dir.join(&dest_file_name);
