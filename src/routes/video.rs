@@ -336,7 +336,7 @@ fn check_mp4_structure(path: &PathBuf) -> bool {
     // Read the first 1MB of the file to check for moov atom
     let mut reader = std::io::BufReader::new(file);
     let mut buffer = [0u8; 8]; // 8 bytes for atom size (4) and type (4)
-    let mut position = 0;
+    let position = 0;
 
     // Limit our search to the first 1MB to avoid reading the entire file
     let search_limit = 1024 * 1024;
@@ -364,7 +364,7 @@ fn check_mp4_structure(path: &PathBuf) -> bool {
             // Skip the rest of this atom (size - 8 bytes we already read)
             let to_skip = size as u64 - 8;
             match reader.seek(SeekFrom::Current(to_skip as i64)) {
-                Ok(new_pos) => position = new_pos,
+          Ok(_) => {},
                 Err(_) => break, // Error seeking
             }
         } else if size == 0 {
@@ -391,7 +391,6 @@ fn get_mp4_duration(path: &PathBuf) -> Option<f64> {
     // Read the file to find the moov atom and extract duration
     let mut reader = std::io::BufReader::new(file);
     let mut buffer = [0u8; 8]; // 8 bytes for atom size (4) and type (4)
-    let mut position = 0;
 
     // We'll search the entire file for the moov atom
     while let Ok(_) = reader.read_exact(&mut buffer) {
@@ -478,7 +477,7 @@ fn get_mp4_duration(path: &PathBuf) -> Option<f64> {
             // Skip the rest of this atom (size - 8 bytes we already read)
             let to_skip = size as u64 - 8;
             match reader.seek(SeekFrom::Current(to_skip as i64)) {
-                Ok(new_pos) => position = new_pos,
+          Ok(_) => {},
                 Err(_) => break, // Error seeking
             }
         } else if size == 0 {
