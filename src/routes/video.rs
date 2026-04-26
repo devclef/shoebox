@@ -341,38 +341,40 @@ fn check_mp4_structure(path: &PathBuf) -> bool {
     // Limit our search to the first 1MB to avoid reading the entire file
     let search_limit = 1024 * 1024;
 
-    while position < search_limit {
-        // Read atom header
-        match reader.read_exact(&mut buffer) {
-            Ok(_) => {},
-            Err(_) => break, // End of file or error
-        }
-
-        // Parse atom size (big-endian)
-        let size = ((buffer[0] as u32) << 24) |
-                  ((buffer[1] as u32) << 16) |
-                  ((buffer[2] as u32) << 8) |
-                  (buffer[3] as u32);
-
-        // Check if this is the moov atom
-        if &buffer[4..8] == b"moov" {
-            return true; // Found moov atom near the beginning
-        }
-
-        // Skip to the next atom
-        if size > 8 {
-            // Skip the rest of this atom (size - 8 bytes we already read)
-            let to_skip = size as u64 - 8;
-            match reader.seek(SeekFrom::Current(to_skip as i64)) {
-          Ok(_) => {},
-                Err(_) => break, // Error seeking
+    if position < search_limit {
+        loop {
+            // Read atom header
+            match reader.read_exact(&mut buffer) {
+                Ok(_) => {},
+                Err(_) => break, // End of file or error
             }
-        } else if size == 0 {
-            // Size 0 means the rest of the file, so we're done
-            break;
-        } else {
-            // Invalid size, something is wrong
-            break;
+
+            // Parse atom size (big-endian)
+            let size = ((buffer[0] as u32) << 24) |
+                      ((buffer[1] as u32) << 16) |
+                      ((buffer[2] as u32) << 8) |
+                      (buffer[3] as u32);
+
+            // Check if this is the moov atom
+            if &buffer[4..8] == b"moov" {
+                return true; // Found moov atom near the beginning
+            }
+
+            // Skip to the next atom
+            if size > 8 {
+                // Skip the rest of this atom (size - 8 bytes we already read)
+                let to_skip = size as u64 - 8;
+                match reader.seek(SeekFrom::Current(to_skip as i64)) {
+                    Ok(_) => {},
+                    Err(_) => break, // Error seeking
+                }
+            } else if size == 0 {
+                // Size 0 means the rest of the file, so we're done
+                break;
+            } else {
+                // Invalid size, something is wrong
+                break;
+            }
         }
     }
 
