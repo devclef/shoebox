@@ -405,7 +405,7 @@ const BulkEditPage: React.FC = () => {
                           {video.title || video.file_name}
                         </Text>
                         <Text fontSize="sm" color="gray.500" noOfLines={1}>
-                          {video.duration ? `${Math.floor(video.duration / 60)}:${(video.duration % 60).toString().padStart(2, '0')}` : 'Unknown duration'}
+                          {video.duration ? `${Math.floor(video.duration / 60000)}:${Math.floor((video.duration % 60000) / 1000).toString().padStart(2, '0')}` : 'Unknown duration'}
                         </Text>
                       </Td>
                       <Td>

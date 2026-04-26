@@ -35,13 +35,14 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
     }
   };
 
-  // Format duration
-  const formatDuration = (seconds?: number): string => {
-    if (!seconds) return '';
+  // Format duration (input is in milliseconds)
+  const formatDuration = (ms?: number): string => {
+    if (!ms) return '';
 
+    const seconds = ms / 1000;
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
+    const remainingSeconds = Math.floor(seconds % 60);
 
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
