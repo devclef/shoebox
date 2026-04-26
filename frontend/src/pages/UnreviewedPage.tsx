@@ -72,6 +72,16 @@ const UnreviewedPage: React.FC = () => {
 
   const borderColor = useColorModeValue('gray.200', 'gray.700');
 
+  // Format duration (input is in milliseconds) to hh:mm:ss
+  const formatDuration = (ms?: number): string => {
+    if (!ms) return '';
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   // Parse URL parameters and update search params
   useEffect(() => {
     const urlParams = new URLSearchParams(routerLocation.search);
@@ -578,6 +588,11 @@ const UnreviewedPage: React.FC = () => {
                   <Text fontSize="sm" color="gray.500">
                     Size: {video.file_size ? `${(video.file_size / (1024 * 1024)).toFixed(2)} MB` : 'Unknown'}
                   </Text>
+                  {video.duration && (
+                    <Text fontSize="sm" color="gray.500">
+                      Duration: {formatDuration(video.duration)}
+                    </Text>
+                  )}
                   {video.created_date && (
                     <Text fontSize="sm" color="gray.500">
                       Created: {new Date(video.created_date).toLocaleDateString()}
