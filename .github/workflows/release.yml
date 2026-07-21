@@ -119,7 +119,7 @@ jobs:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.update-version.outputs.new_version }}
           name: Release v${{ needs.update-version.outputs.new_version }}
