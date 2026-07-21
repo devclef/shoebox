@@ -1,12 +1,12 @@
 # Multi-stage build for Shoebox
 
 # Stage 1: Build the frontend
-FROM node:18-alpine AS frontend-builder
+FROM node:20-alpine AS frontend-builder
 WORKDIR /app/frontend
 
 # Copy frontend package.json and install dependencies
-COPY frontend/package.json frontend/package-lock.json* ./
-RUN yarn install
+COPY frontend/package.json frontend/yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 # Copy frontend source code
 COPY frontend/ ./
