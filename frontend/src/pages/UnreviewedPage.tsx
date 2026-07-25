@@ -573,7 +573,7 @@ const UnreviewedPage: React.FC = () => {
                   mb={4}
                 >
                   <ReactPlayer
-                    url={`/api/videos/${video.id}/stream`}
+                    src={`/api/videos/${video.id}/stream`}
                     controls
                     width="100%"
                     height="auto"

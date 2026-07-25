@@ -6,12 +6,12 @@
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "axios": "^1.18.0",
+    "axios": "^1.18.1",
     "framer-motion": "^12.42.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.7.0",
-    "react-player": "^2.13.0",
+    "react-player": "^3.4.0",
     "react-router-dom": "^7.18.1",
     "react-select": "^5.8.0",
     "tsc": "^2.0.4"
@@ -20,7 +20,7 @@
     "@types/node": "^26.1.1",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.17",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^5.2.0",
     "typescript": "^7.0.2",
     "vite": "^6.4.3"
   },
