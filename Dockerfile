@@ -1,7 +1,7 @@
 # Multi-stage build for Shoebox
 
 # Stage 1: Build the frontend
-FROM node:20-alpine AS frontend-builder
+FROM node:22-alpine AS frontend-builder
 WORKDIR /app/frontend
 
 # Copy frontend package.json and install dependencies
