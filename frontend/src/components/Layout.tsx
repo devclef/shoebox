@@ -19,6 +19,7 @@ import {
   DrawerContent,
   DrawerOverlay,
   useDisclosure,
+  Image,
 } from '@chakra-ui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
@@ -131,7 +132,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   whileTap={{ scale: 0.95 }}
                   style={{ display: 'flex', alignItems: 'center' }}
                 >
-                  <img src={logo} alt="Shoebox Logo" height="40px" style={{ marginRight: '8px' }} />
+                  <Image src={logo} alt="Shoebox Logo" height="40px" objectFit="contain" mr={2} />
                   <Heading
                     as="h1"
                     size="lg"
@@ -203,7 +204,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <DrawerCloseButton />
               <DrawerBody p={6}>
                 <Flex align="center" mb={6}>
-                  <img src={logo} alt="Shoebox Logo" height="40px" style={{ marginRight: '8px' }} />
+                  <Image src={logo} alt="Shoebox Logo" height="40px" objectFit="contain" mr={2} />
                   <Heading
                     as="h1"
                     size="lg"
