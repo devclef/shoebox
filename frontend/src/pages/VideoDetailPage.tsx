@@ -25,7 +25,6 @@ import {
   useColorModeValue
 } from '@chakra-ui/react';
 import { FaEdit, FaSave, FaTrash, FaArrowLeft, FaBug } from 'react-icons/fa';
-import ReactPlayer from 'react-player';
 import { videoApi, VideoWithMetadata, UpdateVideoDto } from '../api/client';
 import VideoForm from '../components/VideoForm';
 
@@ -264,12 +263,11 @@ const VideoDetailPage: React.FC = () => {
             borderWidth="1px"
             borderColor={borderColor}
           >
-            <ReactPlayer
+            <video
               src={`/api/videos/${video.id}/stream`}
               controls
               width="100%"
-              height="auto"
-              style={{ aspectRatio: '16/9' }}
+              style={{ aspectRatio: '16/9', objectFit: 'contain', display: 'block' }}
             />
           </Box>
 

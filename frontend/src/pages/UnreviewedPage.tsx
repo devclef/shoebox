@@ -22,7 +22,6 @@ import {
   SimpleGrid
 } from '@chakra-ui/react';
 import { FaSave, FaArrowLeft, FaBug, FaChevronDown, FaChevronUp, FaArrowRight, FaCalendarAlt } from 'react-icons/fa';
-import ReactPlayer from 'react-player';
 import { videoApi, VideoWithMetadata, UpdateVideoDto, VideoSearchParams } from '../api/client';
 import SearchFilters from '../components/SearchFilters';
 import VideoForm from '../components/VideoForm';
@@ -572,12 +571,11 @@ const UnreviewedPage: React.FC = () => {
                   borderColor={borderColor}
                   mb={4}
                 >
-                  <ReactPlayer
+                  <video
                     src={`/api/videos/${video.id}/stream`}
                     controls
                     width="100%"
-                    height="auto"
-                    style={{ aspectRatio: '16/9' }}
+                    style={{ aspectRatio: '16/9', objectFit: 'contain', display: 'block' }}
                   />
                 </Box>
 
