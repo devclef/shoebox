@@ -25,6 +25,7 @@ export interface Video {
   duration?: number;
   location?: string;
   event?: string;
+  missing: boolean;
   created_at: string;
   updated_at: string;
 }

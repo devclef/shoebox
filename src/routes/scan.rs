@@ -46,6 +46,7 @@ async fn start_scan(State(state): State<AppState>) -> Result<Json<ScanResponse>>
         status.in_progress = true;
         status.new_videos_count = 0;
         status.updated_videos_count = 0;
+        status.missing_count = 0;
     }
 
     // Clone what we need for the background task
@@ -117,10 +118,16 @@ async fn start_scan(State(state): State<AppState>) -> Result<Json<ScanResponse>>
                     ).await {
                         Ok((new_videos, updated_videos)) => {
                             // Detect missing files (files in DB but not on disk)
-                            let missing = ScannerService::detect_missing_files(
+                            let missing = match ScannerService::detect_missing_files(
                                 &source_paths,
                                 &video_service_clone,
-                            ).await.unwrap_or(0);
+                            ).await {
+                                Ok(count) => count,
+                                Err(e) => {
+                                    tracing::error!("Error detecting missing files: {}", e);
+                                    0
+                                }
+                            };
 
                             // Update scan status with final results
                             let mut status = scan_status.write().await;
