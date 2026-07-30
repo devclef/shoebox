@@ -9,6 +9,7 @@ use crate::services::person::PersonService;
 use crate::services::thumbnail::ThumbnailService;
 use crate::services::shoebox::ShoeboxService;
 
+#[derive(Clone)]
 pub struct VideoService {
     db: Pool<Postgres>,
     tag_service: TagService,
@@ -478,6 +479,115 @@ impl VideoService {
         Ok(updated_videos)
     }
 
+    /// Find all missing videos (files that no longer exist on disk)
+    pub async fn find_missing(&self, limit: i64, offset: i64) -> Result<Vec<VideoWithMetadata>> {
+        let mut videos = sqlx::query_as::<_, Video>(
+            "SELECT * FROM videos WHERE missing = TRUE ORDER BY updated_at DESC LIMIT $1 OFFSET $2"
+        )
+        .bind(limit)
+        .bind(offset)
+        .fetch_all(&self.db)
+        .await
+        .map_err(AppError::Database)?;
+
+        for video in &mut videos {
+            video.thumbnail_path = self.transform_thumbnail_path(video.thumbnail_path.clone());
+        }
+
+        // Fetch metadata for each video
+        let mut results = Vec::new();
+        for video in videos {
+            let tags = sqlx::query_scalar::<_, String>(
+                "SELECT t.name FROM tags t JOIN video_tags vt ON t.id = vt.tag_id WHERE vt.video_id = $1"
+            )
+            .bind(&video.id)
+            .fetch_all(&self.db)
+            .await
+            .map_err(AppError::Database)?;
+
+            let people = sqlx::query_scalar::<_, String>(
+                "SELECT p.name FROM people p JOIN video_people vp ON p.id = vp.person_id WHERE vp.video_id = $1"
+            )
+            .bind(&video.id)
+            .fetch_all(&self.db)
+            .await
+            .map_err(AppError::Database)?;
+
+            let shoeboxes = sqlx::query_scalar::<_, String>(
+                "SELECT s.name FROM shoeboxes s JOIN video_shoeboxes vs ON s.id = vs.shoebox_id WHERE vs.video_id = $1"
+            )
+            .bind(&video.id)
+            .fetch_all(&self.db)
+            .await
+            .map_err(AppError::Database)?;
+
+            results.push(VideoWithMetadata {
+                video,
+                tags,
+                people,
+                shoeboxes,
+            });
+        }
+
+        Ok(results)
+    }
+
+    /// Update a video's file path and clear the missing flag if the file exists
+    pub async fn update_file_path(&self, id: &str, new_path: String) -> Result<Video> {
+        let now = chrono::Utc::now().naive_utc();
+        let file_exists = std::path::Path::new(&new_path).exists();
+
+        sqlx::query(
+            "UPDATE videos SET file_path = $1, missing = $2, updated_at = $3::timestamp WHERE id = $4"
+        )
+        .bind(&new_path)
+        .bind(!file_exists)
+        .bind(now)
+        .bind(id)
+        .execute(&self.db)
+        .await
+        .map_err(AppError::Database)?;
+
+        info!("Updated file path for video {} to {} (exists: {})", id, new_path, file_exists);
+        self.find_by_id(id).await
+    }
+
+    /// Bulk delete videos by ID
+    pub async fn bulk_delete(&self, ids: Vec<String>) -> Result<usize> {
+        let mut count = 0;
+        for id in &ids {
+            if let Err(e) = self.delete(id).await {
+                error!("Failed to delete video {}: {}", id, e);
+            } else {
+                count += 1;
+            }
+        }
+        Ok(count)
+    }
+
+    /// Mark a video as missing (file no longer exists on disk)
+    pub async fn mark_missing(&self, id: &str) -> Result<()> {
+        let now = chrono::Utc::now().naive_utc();
+        sqlx::query("UPDATE videos SET missing = TRUE, updated_at = $1::timestamp WHERE id = $2")
+            .bind(now)
+            .bind(id)
+            .execute(&self.db)
+            .await
+            .map_err(AppError::Database)?;
+        Ok(())
+    }
+
+    /// Get all non-missing video IDs and file paths
+    pub async fn find_non_missing(&self) -> Result<Vec<(String, String)>> {
+        let rows = sqlx::query_as::<_, (String, String)>(
+            "SELECT id, file_path FROM videos WHERE missing = FALSE"
+        )
+        .fetch_all(&self.db)
+        .await
+        .map_err(AppError::Database)?;
+        Ok(rows)
+    }
+
     pub async fn search(&self, params: VideoSearchParams) -> Result<Vec<VideoWithMetadata>> {
         let mut conditions = Vec::<String>::new();
         let mut query_params = Vec::new();
@@ -587,6 +697,10 @@ impl VideoService {
             conditions.push("(v.rating IS NULL AND v.description IS NULL AND v.location IS NULL AND v.event IS NULL AND NOT EXISTS (SELECT 1 FROM video_tags WHERE video_id = v.id) AND NOT EXISTS (SELECT 1 FROM video_people WHERE video_id = v.id))".to_string());
         }
 
+        if let Some(missing) = params.missing {
+            conditions.push(format!("v.missing = {}", missing));
+        }
+
         if let Some(start_date) = &params.start_date {
             param_count += 1;
             conditions.push(format!("date(v.created_date) >= date(${}) ", param_count));
@@ -685,6 +799,7 @@ impl VideoService {
                 exif_data: row.get("exif_data"),
                 location: row.get("location"),
                 event: row.get("event"),
+                missing: row.get("missing"),
                 created_at: row.get("created_at"),
                 updated_at: row.get("updated_at"),
             };

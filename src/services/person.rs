@@ -5,6 +5,7 @@ use uuid::Uuid;
 use crate::error::{AppError, Result};
 use crate::models::{Person, CreatePersonDto, PersonUsage};
 
+#[derive(Clone)]
 pub struct PersonService {
     db: Pool<Postgres>,
 }

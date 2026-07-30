@@ -23,6 +23,7 @@ struct ScanStatusResponse {
     in_progress: bool,
     new_videos_count: usize,
     updated_videos_count: usize,
+    missing_count: usize,
 }
 
 async fn start_scan(State(state): State<AppState>) -> Result<Json<ScanResponse>> {
@@ -64,6 +65,7 @@ async fn start_scan(State(state): State<AppState>) -> Result<Json<ScanResponse>>
         );
 
         let thumbnail_service = ThumbnailService::new(&config);
+        let video_service_clone = video_service.clone();
 
         // Start the scan but don't wait for it to complete
         match ScannerService::scan_directories(
@@ -114,11 +116,18 @@ async fn start_scan(State(state): State<AppState>) -> Result<Json<ScanResponse>>
                         Vec::new() // Empty vec since we've already waited for tasks
                     ).await {
                         Ok((new_videos, updated_videos)) => {
+                            // Detect missing files (files in DB but not on disk)
+                            let missing = ScannerService::detect_missing_files(
+                                &source_paths,
+                                &video_service_clone,
+                            ).await.unwrap_or(0);
+
                             // Update scan status with final results
                             let mut status = scan_status.write().await;
                             status.in_progress = false;
                             status.new_videos_count = new_videos.len();
                             status.updated_videos_count = updated_videos.len();
+                            status.missing_count = missing;
                         },
                         Err(e) => {
                             tracing::error!("Error collecting scan results: {}", e);
@@ -151,5 +160,6 @@ async fn get_scan_status(State(state): State<AppState>) -> Result<Json<ScanStatu
         in_progress: status.in_progress,
         new_videos_count: status.new_videos_count,
         updated_videos_count: status.updated_videos_count,
+        missing_count: status.missing_count,
     }))
 }

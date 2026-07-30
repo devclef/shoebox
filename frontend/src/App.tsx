@@ -10,6 +10,7 @@ import UnreviewedPage from './pages/UnreviewedPage';
 import SystemInfoPage from './pages/SystemInfoPage';
 import RatedVideosTimelinePage from './pages/RatedVideosTimelinePage';
 import BulkEditPage from './pages/BulkEditPage';
+import MissingVideosPage from './pages/MissingVideosPage';
 
 const App: React.FC = () => {
   return (
@@ -22,6 +23,7 @@ const App: React.FC = () => {
           <Route path="/export" element={<ExportPage />} />
           <Route path="/bulk-edit" element={<BulkEditPage />} />
           <Route path="/manage" element={<ManagementPage />} />
+          <Route path="/missing" element={<MissingVideosPage />} />
           <Route path="/system" element={<SystemInfoPage />} />
           <Route path="/timeline" element={<RatedVideosTimelinePage />} />
         </Routes>

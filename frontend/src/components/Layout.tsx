@@ -23,7 +23,7 @@ import {
 } from '@chakra-ui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import { FaSun, FaMoon, FaVideo, FaFileExport, FaTags, FaClipboardCheck, FaCog, FaChartLine, FaEdit, FaBars } from 'react-icons/fa';
+import { FaSun, FaMoon, FaVideo, FaFileExport, FaTags, FaClipboardCheck, FaCog, FaChartLine, FaEdit, FaBars, FaExclamationTriangle } from 'react-icons/fa';
 import { useScanContext } from '../contexts/ScanContext';
 import logo from '../assets/logo_large.png';
 
@@ -84,6 +84,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { to: '/unreviewed', icon: <FaClipboardCheck />, label: 'Unreviewed' },
     { to: '/export', icon: <FaFileExport />, label: 'Export' },
     { to: '/bulk-edit', icon: <FaEdit />, label: 'Bulk Edit' },
+    { to: '/missing', icon: <FaExclamationTriangle />, label: 'Missing' },
     { to: '/manage', icon: <FaTags />, label: 'Manage' },
     { to: '/system', icon: <FaCog />, label: 'System' },
   ];
@@ -234,40 +235,57 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         )}
       </AnimatePresence>
 
-      {scanStatus.inProgress && (
+      {(scanStatus.inProgress || scanStatus.missingCount > 0) && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
         >
           <Alert
-            status="info"
+            status={scanStatus.missingCount > 0 && !scanStatus.inProgress ? 'warning' : 'info'}
             variant="subtle"
             borderRadius="xl"
-            bg="linear-gradient(135deg, brand.500.1, brand.700.1)"
-            borderColor="brand.500.3"
+            bg={scanStatus.missingCount > 0 && !scanStatus.inProgress ? 'yellow.50' : 'linear-gradient(135deg, brand.500.1, brand.700.1)'}
+            borderColor={scanStatus.missingCount > 0 && !scanStatus.inProgress ? 'yellow.200' : 'brand.500.3'}
             mb={4}
           >
             <AlertIcon />
-            <Flex align="center">
-              <Spinner size="sm" color="brand.500" mr={2} />
-              <Flex direction="column">
-                <AlertTitle fontSize="sm" fontWeight="600">
-                  Scan in progress
-                </AlertTitle>
-                {scanStatus.newVideosCount > 0 || scanStatus.updatedVideosCount > 0 ? (
-                  <AlertDescription fontSize="xs" mt={1}>
-                    Found <Badge colorScheme="brand" ml={1}>{scanStatus.newVideosCount} new</Badge>
-                    {' and updated '}
-                    <Badge colorScheme="accent" ml={1}>{scanStatus.updatedVideosCount} videos</Badge>
-                  </AlertDescription>
-                ) : (
-                  <AlertDescription fontSize="xs" ml={2}>
-                    Scanning for videos...
-                  </AlertDescription>
-                )}
+            {scanStatus.inProgress ? (
+              <Flex align="center">
+                <Spinner size="sm" color="brand.500" mr={2} />
+                <Flex direction="column">
+                  <AlertTitle fontSize="sm" fontWeight="600">
+                    Scan in progress
+                  </AlertTitle>
+                  {scanStatus.newVideosCount > 0 || scanStatus.updatedVideosCount > 0 ? (
+                    <AlertDescription fontSize="xs" mt={1}>
+                      Found <Badge colorScheme="brand" ml={1}>{scanStatus.newVideosCount} new</Badge>
+                      {' and updated '}
+                      <Badge colorScheme="accent" ml={1}>{scanStatus.updatedVideosCount} videos</Badge>
+                    </AlertDescription>
+                  ) : (
+                    <AlertDescription fontSize="xs" ml={2}>
+                      Scanning for videos...
+                    </AlertDescription>
+                  )}
+                </Flex>
               </Flex>
-            </Flex>
+            ) : (
+              <Flex align="center">
+                <Flex direction="column" flex="1">
+                  <AlertTitle fontSize="sm" fontWeight="600">
+                    {scanStatus.missingCount} missing file{scanStatus.missingCount !== 1 ? 's' : ''} detected
+                  </AlertTitle>
+                  <AlertDescription fontSize="xs" ml={2}>
+                    Run a scan or visit the{' '}
+                    <Link as={RouterLink} to="/missing" color="yellow.600" fontWeight="600" _hover={{ textDecoration: 'underline' }}>
+                      Missing Files
+                    </Link>{' '}
+                    page for details.
+                  </AlertDescription>
+                </Flex>
+              </Flex>
+            )}
           </Alert>
         </motion.div>
       )}

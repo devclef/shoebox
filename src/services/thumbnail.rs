@@ -7,6 +7,7 @@ use tracing::{info, error};
 use crate::error::{AppError, Result};
 use crate::config::Config;
 
+#[derive(Clone)]
 pub struct ThumbnailService {
     thumbnail_dir: PathBuf,
     #[allow(dead_code)]

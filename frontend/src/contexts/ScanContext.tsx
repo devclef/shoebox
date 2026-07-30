@@ -4,6 +4,7 @@ interface ScanStatus {
   inProgress: boolean;
   newVideosCount: number;
   updatedVideosCount: number;
+  missingCount: number;
 }
 
 interface ScanContextType {
@@ -15,6 +16,7 @@ const defaultScanStatus: ScanStatus = {
   inProgress: false,
   newVideosCount: 0,
   updatedVideosCount: 0,
+  missingCount: 0,
 };
 
 const ScanContext = createContext<ScanContextType | undefined>(undefined);
@@ -45,6 +47,7 @@ export const ScanProvider: React.FC<ScanProviderProps> = ({ children }) => {
         inProgress: data.in_progress,
         newVideosCount: data.new_videos_count,
         updatedVideosCount: data.updated_videos_count,
+        missingCount: data.missing_count || 0,
       });
     } catch (error) {
       console.error('Error checking scan status:', error);

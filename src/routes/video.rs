@@ -16,6 +16,7 @@ use crate::error::{Result, AppError};
 use crate::models::{CreateVideoDto, UpdateVideoDto, VideoSearchParams, BulkUpdateVideoDto};
 use crate::services::AppState;
 use crate::services::VideoService;
+use serde::Serialize;
 
 pub fn router(app_state: AppState) -> Router {
     Router::new()
@@ -23,9 +24,12 @@ pub fn router(app_state: AppState) -> Router {
         .route("/", post(create_video))
         .route("/search", post(search_videos))
         .route("/bulk-update", post(bulk_update_videos))
+        .route("/bulk-delete", delete(bulk_delete_videos))
+        .route("/missing", get(list_missing_videos))
         .route("/{id}", get(get_video))
         .route("/{id}", put(update_video))
         .route("/{id}", delete(delete_video))
+        .route("/{id}/path", put(update_video_path))
         .route("/{id}/stream", get(stream_video))
         .with_state(app_state)
 }
@@ -34,6 +38,21 @@ pub fn router(app_state: AppState) -> Router {
 struct PaginationParams {
     limit: Option<i64>,
     offset: Option<i64>,
+}
+
+#[derive(Debug, Deserialize)]
+struct UpdatePathDto {
+    file_path: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct BulkDeleteDto {
+    video_ids: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct BulkDeleteResponse {
+    deleted_count: usize,
 }
 
 async fn list_videos(
@@ -150,6 +169,58 @@ async fn bulk_update_videos(
 
     let videos = video_service.bulk_update(bulk_update_dto.video_ids, bulk_update_dto.update).await?;
     Ok(Json(videos))
+}
+
+async fn bulk_delete_videos(
+    State(state): State<AppState>,
+    Json(bulk_delete_dto): Json<BulkDeleteDto>,
+) -> Result<Json<BulkDeleteResponse>> {
+    let video_service = VideoService::new(
+        state.db.clone(),
+        crate::services::TagService::new(state.db.clone()),
+        crate::services::PersonService::new(state.db.clone()),
+        crate::services::ThumbnailService::new(&state.config),
+        crate::services::ShoeboxService::new(state.db.clone()),
+    );
+
+    let count = video_service.bulk_delete(bulk_delete_dto.video_ids).await?;
+    Ok(Json(BulkDeleteResponse { deleted_count: count }))
+}
+
+async fn list_missing_videos(
+    State(state): State<AppState>,
+    Query(params): Query<PaginationParams>,
+) -> Result<Json<Vec<crate::models::VideoWithMetadata>>> {
+    let video_service = VideoService::new(
+        state.db.clone(),
+        crate::services::TagService::new(state.db.clone()),
+        crate::services::PersonService::new(state.db.clone()),
+        crate::services::ThumbnailService::new(&state.config),
+        crate::services::ShoeboxService::new(state.db.clone()),
+    );
+
+    let limit = params.limit.unwrap_or(100);
+    let offset = params.offset.unwrap_or(0);
+
+    let videos = video_service.find_missing(limit, offset).await?;
+    Ok(Json(videos))
+}
+
+async fn update_video_path(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+    Json(path_dto): Json<UpdatePathDto>,
+) -> Result<Json<crate::models::Video>> {
+    let video_service = VideoService::new(
+        state.db.clone(),
+        crate::services::TagService::new(state.db.clone()),
+        crate::services::PersonService::new(state.db.clone()),
+        crate::services::ThumbnailService::new(&state.config),
+        crate::services::ShoeboxService::new(state.db.clone()),
+    );
+
+    let video = video_service.update_file_path(&id, path_dto.file_path).await?;
+    Ok(Json(video))
 }
 
 async fn stream_video(

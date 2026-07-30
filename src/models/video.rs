@@ -19,6 +19,7 @@ pub struct Video {
     pub exif_data: Option<serde_json::Value>,
     pub location: Option<String>,
     pub event: Option<String>,
+    pub missing: bool,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }
@@ -82,6 +83,7 @@ pub struct VideoSearchParams {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
     pub unreviewed: Option<bool>,
+    pub missing: Option<bool>,
     pub sort_by: Option<String>,
     pub sort_order: Option<String>,
     pub start_date: Option<String>,
@@ -117,6 +119,7 @@ impl Video {
             exif_data: None,
             location: None,
             event: None,
+            missing: false,
             created_at: now,
             updated_at: now,
         }

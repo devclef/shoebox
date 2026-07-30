@@ -5,6 +5,7 @@ use uuid::Uuid;
 use crate::error::{AppError, Result};
 use crate::models::{Tag, CreateTagDto, TagUsage};
 
+#[derive(Clone)]
 pub struct TagService {
     db: Pool<Postgres>,
 }

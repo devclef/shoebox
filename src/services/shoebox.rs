@@ -5,6 +5,7 @@ use uuid::Uuid;
 use crate::error::{AppError, Result};
 use crate::models::{Shoebox, CreateShoeboxDto, ShoeboxUsage};
 
+#[derive(Clone)]
 pub struct ShoeboxService {
     db: Pool<Postgres>,
 }

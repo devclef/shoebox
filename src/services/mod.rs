@@ -30,6 +30,7 @@ pub struct ScanStatus {
     pub in_progress: bool,
     pub new_videos_count: usize,
     pub updated_videos_count: usize,
+    pub missing_count: usize,
 }
 
 

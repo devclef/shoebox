@@ -149,6 +149,13 @@ export interface ScanResponse {
   new_videos: Video[];
 }
 
+export interface ScanStatusResponse {
+  in_progress: boolean;
+  new_videos_count: number;
+  updated_videos_count: number;
+  missing_count: number;
+}
+
 // API functions
 export const videoApi = {
   // Get all videos with pagination
@@ -308,6 +315,43 @@ export const eventApi = {
 export const scanApi = {
   // Scan directories for new videos
   scanDirectories: async (): Promise<ScanResponse> => {
+    const response = await apiClient.post('/scan');
+    return response.data;
+  },
+
+  // Trigger a rescan
+  rescan: async (): Promise<{ message: string; scan_started: boolean }> => {
+    const response = await apiClient.post('/scan');
+    return response.data;
+  },
+};
+
+export const missingApi = {
+  // Get all missing videos
+  getMissingVideos: async (): Promise<VideoWithMetadata[]> => {
+    const response = await apiClient.get('/videos/missing');
+    return response.data;
+  },
+
+  // Update a video's file path
+  updateFilePath: async (id: string, filePath: string): Promise<Video> => {
+    const response = await apiClient.put(`/videos/${id}/path`, { file_path: filePath });
+    return response.data;
+  },
+
+  // Delete a video (remove from Shoebox)
+  deleteVideo: async (id: string): Promise<void> => {
+    await apiClient.delete(`/videos/${id}`);
+  },
+
+  // Bulk delete videos
+  bulkDelete: async (ids: string[]): Promise<{ deleted_count: number }> => {
+    const response = await apiClient.delete('/videos/bulk-delete', { data: { video_ids: ids } });
+    return response.data;
+  },
+
+  // Trigger a rescan
+  rescan: async (): Promise<{ message: string; scan_started: boolean }> => {
     const response = await apiClient.post('/scan');
     return response.data;
   },
