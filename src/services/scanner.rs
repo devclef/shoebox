@@ -13,7 +13,6 @@ use crate::error::AppError;
 use crate::models::{Video, CreateVideoDto};
 use crate::services::video::VideoService;
 use crate::services::thumbnail::ThumbnailService;
-use std::collections::HashSet;
 
 pub struct ScannerService;
 
@@ -731,39 +730,22 @@ impl ScannerService {
     }
 
     /// After a scan, detect which video records in the DB no longer have files on disk.
+    /// Directly checks each video's file_path — works regardless of configured source directories.
     /// Returns the number of videos marked as missing.
     pub async fn detect_missing_files(
-        path_configs: &[crate::config::MediaPathConfig],
+        _path_configs: &[crate::config::MediaPathConfig],
         video_service: &VideoService,
     ) -> Result<usize, AppError> {
-        // Collect all file paths found on disk across all source directories
-        let mut disk_paths: HashSet<String> = HashSet::new();
-        for path_config in path_configs {
-            let path = Path::new(&path_config.path);
-            if !path.exists() {
-                warn!("Source path does not exist during missing detection: {}", path.display());
-                continue;
-            }
-            if let Ok(entries) = Self::get_video_files(path) {
-                for entry in entries {
-                    if let Some(fp) = entry.path().to_str() {
-                        disk_paths.insert(fp.to_string());
-                    }
-                }
-            }
-        }
-
-        info!("Found {} video files on disk for missing detection", disk_paths.len());
-
         // Get all non-missing videos from DB
         let all_videos = video_service.find_non_missing().await?;
 
-        info!("Checking {} DB videos against disk files", all_videos.len());
+        info!("Checking {} DB videos for missing files", all_videos.len());
 
-        // Find videos whose file no longer exists on disk
+        // Directly check if each video's file_path exists on disk
         let mut missing_count = 0;
         for (video_id, file_path) in &all_videos {
-            if !disk_paths.contains(file_path.as_str()) {
+            let exists = Path::new(file_path).is_file();
+            if !exists {
                 info!("Missing file detected: {} ({})", file_path, video_id);
                 if let Err(e) = video_service.mark_missing(video_id).await {
                     error!("Error marking video {} as missing: {}", video_id, e);
