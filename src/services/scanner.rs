@@ -368,14 +368,13 @@ impl ScannerService {
                 info!("Pre-scanning original directory: {}", original_path);
                 let original_path_str = original_path.clone();
                 let original_extension = path_config.original_extension.clone();
-                let all_original_files = all_original_files_arc.clone();
 
-                // Spawn a task for each original directory
-                let prescan_task = task::spawn(async move {
+                // Spawn blocking task for directory walk to avoid blocking tokio threads
+                let prescan_task = task::spawn_blocking(move || {
                     let original_path_obj = Path::new(&original_path_str);
                     if !original_path_obj.exists() {
                         warn!("Original path does not exist: {}", original_path_str);
-                        return;
+                        return std::collections::HashMap::new();
                     }
 
                     let mut files_count = 0;
@@ -411,22 +410,22 @@ impl ScannerService {
                         }
                     }
 
-                    // Update the shared map with our findings
-                    let mut all_files_guard = all_original_files.lock().await;
-                    for (key, value) in local_files {
-                        all_files_guard.insert(key, value);
-                    }
-
                     info!("Found {} original files in {} and its subdirectories", files_count, original_path_str);
+                    local_files
                 });
 
                 prescan_tasks.push(prescan_task);
             }
         }
 
-        // Wait for all pre-scan tasks to complete
-        for task in prescan_tasks {
-            let _ = task.await;
+        // Wait for all pre-scan tasks to complete and merge results
+        for task_result in prescan_tasks {
+            if let Ok(local_files) = task_result.await {
+                let mut all_files_guard = all_original_files_arc.lock().await;
+                for (key, value) in local_files {
+                    all_files_guard.insert(key, value);
+                }
+            }
         }
 
         // Create vectors to hold all the tasks and results
@@ -434,26 +433,35 @@ impl ScannerService {
         let new_videos_arc = Arc::new(tokio::sync::Mutex::new(Vec::new()));
         let updated_videos_arc = Arc::new(tokio::sync::Mutex::new(Vec::new()));
 
-        // Collect all video files from all directories first
+        // Collect all video files from all directories first (blocking walk on blocking pool)
         let mut all_entries = Vec::new();
 
         for path_config in path_configs {
             info!("Scanning directory: {}", path_config.path);
             let path = Path::new(&path_config.path);
+            let path_config_clone = path_config.clone();
 
             if !path.exists() {
                 warn!("Path does not exist: {}", path.display());
                 continue;
             }
 
-            match Self::get_video_files(path) {
-                Ok(entries) => {
+            let path_str = path_config.path.clone();
+            let entries = task::spawn_blocking(move || {
+                Self::get_video_files(Path::new(&path_str))
+            }).await;
+
+            match entries {
+                Ok(Ok(entries)) => {
                     for entry in entries {
-                        all_entries.push((entry, path_config.clone()));
+                        all_entries.push((entry, path_config_clone.clone()));
                     }
                 },
-                Err(e) => {
+                Ok(Err(e)) => {
                     error!("Error scanning directory {}: {}", path.display(), e);
+                },
+                Err(e) => {
+                    error!("Spawn blocking error scanning {}: {}", path.display(), e);
                 }
             }
         }
@@ -510,8 +518,10 @@ impl ScannerService {
 
                         // Fallback to MP4 specific method for MP4 files if ffprobe failed
                         if ffprobe_duration.is_none() && ext == "mp4" {
-                            Self::get_mp4_duration(&std::path::PathBuf::from(&file_path))
-                                .map(|d| d as i64)
+                            let fp = std::path::PathBuf::from(&file_path);
+                            task::spawn_blocking(move || {
+                                Self::get_mp4_duration(&fp)
+                            }).await.map(|r| r.map(|d| d as i64)).unwrap_or(None)
                         } else {
                             ffprobe_duration
                         }
