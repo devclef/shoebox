@@ -161,12 +161,34 @@ async fn start_scan(State(state): State<AppState>) -> Result<Json<ScanResponse>>
 }
 
 async fn get_scan_status(State(state): State<AppState>) -> Result<Json<ScanStatusResponse>> {
-    let status = state.scan_status.read().await;
+    let in_progress = state.scan_status.read().await.in_progress;
+
+    let (new_videos_count, updated_videos_count, missing_count) = if in_progress {
+        let status = state.scan_status.read().await;
+        (
+            status.new_videos_count,
+            status.updated_videos_count,
+            status.missing_count,
+        )
+    } else {
+        // When no scan is in progress, query the DB for the actual missing count
+        // so the banner reflects reality after the user handles missing files
+        let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM videos WHERE missing = TRUE")
+            .fetch_one(&state.db)
+            .await
+            .unwrap_or((0,));
+        let status = state.scan_status.read().await;
+        (
+            status.new_videos_count,
+            status.updated_videos_count,
+            count.0 as usize,
+        )
+    };
 
     Ok(Json(ScanStatusResponse {
-        in_progress: status.in_progress,
-        new_videos_count: status.new_videos_count,
-        updated_videos_count: status.updated_videos_count,
-        missing_count: status.missing_count,
+        in_progress,
+        new_videos_count,
+        updated_videos_count,
+        missing_count,
     }))
 }
