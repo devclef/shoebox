@@ -93,6 +93,30 @@ pub struct VideoSearchParams {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FileSuggestion {
+    pub candidate_path: String,
+    pub duration: Option<i64>,
+    pub file_size: Option<i64>,
+    pub created_date: Option<String>,
+    /// None means we can't compare (candidate has no value for this field)
+    pub duration_match: Option<bool>,
+    /// None means we can't compare (candidate has no value for this field)
+    pub file_size_match: Option<bool>,
+    /// None means we can't compare (candidate has no value for this field)
+    pub created_date_match: Option<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MissingVideoWithSuggestions {
+    #[serde(flatten)]
+    pub video: Video,
+    pub tags: Vec<String>,
+    pub people: Vec<String>,
+    pub shoeboxes: Vec<String>,
+    pub suggestion: Option<FileSuggestion>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ExportRequest {
     pub video_ids: Vec<String>,
     pub project_name: String,

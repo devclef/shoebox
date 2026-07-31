@@ -1,9 +1,11 @@
 use sqlx::{Pool, Postgres, Row};
 use tracing::{info, error};
 use uuid::Uuid;
+use tokio::task;
+use tokio::fs;
 
 use crate::error::{AppError, Result};
-use crate::models::{Video, CreateVideoDto, UpdateVideoDto, VideoWithMetadata, VideoSearchParams};
+use crate::models::{Video, CreateVideoDto, UpdateVideoDto, VideoWithMetadata, VideoSearchParams, FileSuggestion};
 use crate::services::tag::TagService;
 use crate::services::person::PersonService;
 use crate::services::thumbnail::ThumbnailService;
@@ -586,6 +588,198 @@ impl VideoService {
         .await
         .map_err(AppError::Database)?;
         Ok(rows)
+    }
+
+    /// Search configured media source paths for a file matching the given filename.
+    /// If found, returns a FileSuggestion with metadata comparison against the DB record.
+    pub async fn find_suggestion_for_file(
+        &self,
+        file_name: &str,
+        source_paths: &[crate::config::MediaPathConfig],
+        db_duration: Option<i64>,
+        db_file_size: Option<i64>,
+        db_created_date: Option<String>,
+    ) -> Option<FileSuggestion> {
+        // Use spawn_blocking to avoid blocking the tokio runtime for directory walks
+        let file_name = file_name.to_string();
+        let source_paths = source_paths.to_vec();
+
+        let candidate = task::spawn_blocking(move || {
+            // Walk all source paths looking for a file with the same name
+            for path_config in &source_paths {
+                let path = std::path::Path::new(&path_config.path);
+                if !path.exists() {
+                    continue;
+                }
+
+                for entry in walkdir::WalkDir::new(path).follow_links(true).into_iter().filter_map(|e| e.ok()) {
+                    let entry_path = entry.path();
+                    if entry_path.is_file()
+                        && entry_path.file_name()
+                            .map(|f| f.to_string_lossy() == file_name)
+                            .unwrap_or(false)
+                    {
+                        let candidate_path = entry_path.to_string_lossy().to_string();
+                        info!("Found candidate suggestion for '{}': {}", file_name, candidate_path);
+                        return Some(candidate_path);
+                    }
+                }
+            }
+            None
+        })
+        .await
+        .ok()
+        .flatten();
+
+        #[allow(clippy::question_mark)]
+        let Some(candidate_path) = candidate else {
+            return None;
+        };
+
+        // Now gather metadata for the candidate file (async for ffprobe calls)
+        let file_size = fs::metadata(&candidate_path)
+            .await
+            .ok()
+            .map(|m| m.len() as i64);
+
+        let duration = Self::get_video_duration(&candidate_path).await;
+        let created_date = Self::get_video_creation_date(&candidate_path).await;
+
+        // Compare metadata with DB record
+        let duration_match = match (db_duration, duration) {
+            (Some(db), Some(cand)) => Some(db == cand),
+            _ => None,
+        };
+
+        let file_size_match = match (db_file_size, file_size) {
+            (Some(db), Some(cand)) => Some(db == cand),
+            _ => None,
+        };
+
+        let created_date_match = match (db_created_date, created_date.clone()) {
+            (Some(db), Some(cand)) => {
+                // Parse both dates and compare as Utc
+                let parse_date = |s: &str| -> Option<chrono::DateTime<chrono::Utc>> {
+                    chrono::DateTime::parse_from_rfc3339(s)
+                        .ok()
+                        .map(|dt| dt.with_timezone(&chrono::Utc))
+                        .or_else(|| {
+                            chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d")
+                                .ok()
+                                .map(|d| d.and_time(chrono::NaiveTime::MIN).and_utc())
+                        })
+                };
+
+                match (parse_date(&db), parse_date(&cand)) {
+                    (Some(db_dt), Some(cand_dt)) => {
+                        let diff = (db_dt.timestamp() - cand_dt.timestamp()).abs();
+                        Some(diff <= 86400) // Within 1 day
+                    }
+                    _ => None,
+                }
+            }
+            _ => None,
+        };
+
+        Some(FileSuggestion {
+            candidate_path,
+            duration,
+            file_size,
+            created_date,
+            duration_match,
+            file_size_match,
+            created_date_match,
+        })
+    }
+
+    // Get video duration using FFprobe (duplicated from scanner for use in suggestions)
+    async fn get_video_duration(path: &str) -> Option<i64> {
+        let output = match tokio::process::Command::new("ffprobe")
+            .arg("-v")
+            .arg("error")
+            .arg("-show_entries")
+            .arg("format=duration")
+            .arg("-of")
+            .arg("default=noprint_wrappers=1:nokey=1")
+            .arg(path)
+            .output()
+            .await
+        {
+            Ok(output) => output,
+            Err(_) => return None,
+        };
+
+        if !output.status.success() {
+            return None;
+        }
+
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let duration_str = stdout.trim();
+        if duration_str.is_empty() {
+            return None;
+        }
+
+        match duration_str.parse::<f64>() {
+            Ok(duration_seconds) => Some((duration_seconds * 1000.0) as i64),
+            Err(_) => None,
+        }
+    }
+
+    // Extract creation date from video file using FFprobe (from scanner)
+    async fn get_video_creation_date(path: &str) -> Option<String> {
+        let possible_tags = [
+            "creation_time",
+            "com.apple.quicktime.creationdate",
+            "date",
+            "com.apple.quicktime.createdate",
+        ];
+
+        for tag in &possible_tags {
+            let output = match tokio::process::Command::new("ffprobe")
+                .arg("-v")
+                .arg("error")
+                .arg("-show_entries")
+                .arg(format!("format_tags={tag}"))
+                .arg("-of")
+                .arg("default=noprint_wrappers=1:nokey=1")
+                .arg(path)
+                .output()
+                .await
+            {
+                Ok(output) => output,
+                Err(_) => continue,
+            };
+
+            if !output.status.success() {
+                continue;
+            }
+
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            let creation_time = stdout.trim();
+            if creation_time.is_empty() {
+                continue;
+            }
+
+            let date_formats = [
+                "%Y-%m-%dT%H:%M:%S%.fZ",
+                "%Y-%m-%d %H:%M:%S",
+                "%Y:%m:%d %H:%M:%S",
+                "%Y-%m-%dT%H:%M:%S%z",
+                "%Y-%m-%d",
+            ];
+
+            for format in &date_formats {
+                if let Ok(dt) = chrono::NaiveDateTime::parse_from_str(creation_time, format) {
+                    let datetime = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(dt, chrono::Utc);
+                    return Some(datetime.to_rfc3339());
+                }
+                if let Ok(dt) = chrono::DateTime::parse_from_str(creation_time, format) {
+                    return Some(dt.with_timezone(&chrono::Utc).to_rfc3339());
+                }
+            }
+        }
+
+        None
     }
 
     pub async fn search(&self, params: VideoSearchParams) -> Result<Vec<VideoWithMetadata>> {

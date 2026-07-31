@@ -190,7 +190,7 @@ async fn bulk_delete_videos(
 async fn list_missing_videos(
     State(state): State<AppState>,
     Query(params): Query<PaginationParams>,
-) -> Result<Json<Vec<crate::models::VideoWithMetadata>>> {
+) -> Result<Json<Vec<crate::models::MissingVideoWithSuggestions>>> {
     let video_service = VideoService::new(
         state.db.clone(),
         crate::services::TagService::new(state.db.clone()),
@@ -203,7 +203,31 @@ async fn list_missing_videos(
     let offset = params.offset.unwrap_or(0);
 
     let videos = video_service.find_missing(limit, offset).await?;
-    Ok(Json(videos))
+
+    // Enrich each missing video with filename-based suggestions
+    let source_paths = state.config.media.source_paths.clone();
+    let mut results = Vec::new();
+    for vm in videos {
+        let suggestion = video_service
+            .find_suggestion_for_file(
+                &vm.video.file_name,
+                &source_paths,
+                vm.video.duration,
+                vm.video.file_size,
+                vm.video.created_date.clone(),
+            )
+            .await;
+
+        results.push(crate::models::MissingVideoWithSuggestions {
+            video: vm.video,
+            tags: vm.tags,
+            people: vm.people,
+            shoeboxes: vm.shoeboxes,
+            suggestion,
+        });
+    }
+
+    Ok(Json(results))
 }
 
 async fn update_video_path(
