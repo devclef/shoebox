@@ -179,11 +179,13 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onFilterChange, initialFi
   };
 
   // Custom styles for react-select
-  const selectStyles = {
+  const textColor = useColorModeValue('gray.900', 'gray.100');
+  const selectStyles: any = {
     control: (base: any) => ({
       ...base,
       background: bgColor,
       borderColor: borderColor,
+      color: textColor,
     }),
     menu: (base: any) => ({
       ...base,
@@ -195,8 +197,37 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onFilterChange, initialFi
       backgroundColor: state.isFocused
         ? useColorModeValue('blue.50', 'blue.900')
         : useColorModeValue('white', 'gray.700'),
-      color: useColorModeValue('black', 'black')
-    })
+      color: textColor
+    }),
+    multiValue: (base: any) => ({
+      ...base,
+      backgroundColor: useColorModeValue('blue.100', 'blue.900'),
+    }),
+    multiValueLabel: (base: any) => ({
+      ...base,
+      color: useColorModeValue('blue.900', 'blue.100'),
+      backgroundColor: 'transparent',
+    }),
+    multiValueRemove: (base: any) => ({
+      ...base,
+      color: useColorModeValue('blue.700', 'blue.200'),
+      '&:hover': {
+        backgroundColor: useColorModeValue('blue.200', 'blue.800'),
+        color: 'white',
+      },
+    }),
+    placeholder: (base: any) => ({
+      ...base,
+      color: useColorModeValue('gray.500', 'gray.400'),
+    }),
+    input: (base: any) => ({
+      ...base,
+      color: textColor,
+    }),
+    singleValue: (base: any) => ({
+      ...base,
+      color: textColor,
+    }),
   };
 
   return (
