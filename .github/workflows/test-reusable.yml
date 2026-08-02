@@ -3,6 +3,10 @@ name: Test Reusable
 on:
   workflow_call:
 
+concurrency:
+  group: "shoebox"
+  cancel-in-progress: true
+
 jobs:
   hello:
     runs-on: ubuntu-latest
