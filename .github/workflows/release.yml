@@ -9,22 +9,8 @@ on:
       version:
         description: 'Version to release (e.g., 0.1.0)'
         required: true
-      release_type:
-        description: 'Release type'
-        required: true
-        default: 'minor'
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
       prerelease:
         description: 'Is this a prerelease?'
-        required: true
-        default: false
-        type: boolean
-      update_helm:
-        description: 'Update Helm chart version?'
         required: true
         default: false
         type: boolean
@@ -80,18 +66,7 @@ jobs:
           VERSION="${{ github.event.inputs.version }}"
           echo "new_version=$VERSION" >> $GITHUB_OUTPUT
           sed -i "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
-
-          # Only update the Helm chart if requested
-          if [[ "${{ github.event.inputs.update_helm }}" == "true" ]]; then
-            echo "Updating Helm chart version to $VERSION"
-            sed -i "s/^version: .*/version: $VERSION/" charts/shoebox/Chart.yaml
-            sed -i "s/^appVersion: .*/appVersion: \"$VERSION\"/" charts/shoebox/Chart.yaml
-            git add Cargo.toml charts/shoebox/Chart.yaml
-          else
-            echo "Skipping Helm chart update as requested"
-            git add Cargo.toml
-          fi
-
+          git add Cargo.toml
           git commit -m "chore: bump version to $VERSION"
           git tag -a "v$VERSION" -m "Release v$VERSION"
           git push origin main
@@ -110,47 +85,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate changelog
-        id: changelog
-        uses: metcalfc/changelog-generator@v4.7.0
-        with:
-          myToken: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.update-version.outputs.new_version }}
           name: Release v${{ needs.update-version.outputs.new_version }}
-          body: |
-            ## Shoebox v${{ needs.update-version.outputs.new_version }}
-
-            ${{ steps.changelog.outputs.changelog }}
-
-            ### Docker Image
-            ```
-            docker pull ghcr.io/${{ github.repository }}:${{ needs.update-version.outputs.new_version }}
-            ```
-
-            ${{ github.event.inputs.update_helm == 'true' && '### Helm Chart
-            ```
-            helm repo add shoebox https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/helm/
-            helm repo update
-            helm install shoebox shoebox/shoebox --version ${{ needs.update-version.outputs.new_version }}
-            ```' || '' }}
-          draft: false
+          generate_release_notes: true
           prerelease: ${{ github.event.inputs.prerelease }}
-
-  release-helm-chart:
-    needs: [update-version, create-release]
-    if: ${{ github.event.inputs.update_helm == 'true' }}
-    uses: ./.github/workflows/helm-release.yml
-
-  update-docs-with-helm:
-    needs: [update-version, create-release, release-helm-chart]
-    if: ${{ github.event.inputs.update_helm == 'true' }}
-    uses: ./.github/workflows/mdbook.yml
-
-  update-docs-without-helm:
-    needs: [update-version, create-release]
-    if: ${{ github.event.inputs.update_helm != 'true' }}
-    uses: ./.github/workflows/mdbook.yml
