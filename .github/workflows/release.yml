@@ -1,7 +1,7 @@
 name: Release
 
 permissions:
-  contents: read
+  contents: write
 
 on:
   workflow_dispatch:
@@ -100,8 +100,6 @@ jobs:
   build-and-publish:
     needs: update-version
     uses: ./.github/workflows/build-and-publish.yml
-    secrets:
-      GH_PAT: ${{ secrets.GITHUB_TOKEN }}
 
   create-release:
     needs: [update-version, build-and-publish]
@@ -151,12 +149,8 @@ jobs:
     needs: [update-version, create-release, release-helm-chart]
     if: ${{ github.event.inputs.update_helm == 'true' }}
     uses: ./.github/workflows/mdbook.yml
-    secrets:
-      GH_PAT: ${{ secrets.GITHUB_TOKEN }}
 
   update-docs-without-helm:
     needs: [update-version, create-release]
     if: ${{ github.event.inputs.update_helm != 'true' }}
     uses: ./.github/workflows/mdbook.yml
-    secrets:
-      GH_PAT: ${{ secrets.GITHUB_TOKEN }}
