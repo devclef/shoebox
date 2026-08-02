@@ -69,20 +69,3 @@ jobs:
   build-and-publish:
     needs: update-version
     uses: ./.github/workflows/build-and-publish.yml
-
-  create-release:
-    needs: [update-version, build-and-publish]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: v${{ needs.update-version.outputs.new_version }}
-          name: Release v${{ needs.update-version.outputs.new_version }}
-          generate_release_notes: true
-          prerelease: ${{ github.event.inputs.prerelease }}
