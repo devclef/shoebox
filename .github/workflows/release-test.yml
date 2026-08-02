@@ -1,0 +1,17 @@
+name: Release Test
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.1.0)'
+        required: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello from Release Test, version ${{ github.event.inputs.version }}"
