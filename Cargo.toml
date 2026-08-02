@@ -1,6 +1,6 @@
 [package]
 name = "shoebox"
-version = "0.0.13"
+version = "0.0.14"
 edition = "2021"
 description = "A digital shoebox for organizing and preserving your videos"
 authors = ["Developer"]
