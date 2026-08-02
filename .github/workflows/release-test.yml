@@ -68,4 +68,4 @@ jobs:
 
   build-and-publish:
     needs: update-version
-    uses: ./.github/workflows/build-and-publish.yml
+    uses: ./.github/workflows/test-reusable.yml
