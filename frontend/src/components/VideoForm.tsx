@@ -13,6 +13,7 @@ import {
 import { FaStar, FaRegStar } from 'react-icons/fa';
 import CreatableSelect from 'react-select/creatable';
 import { tagApi, personApi, locationApi, eventApi, shoeboxApi, VideoWithMetadata, UpdateVideoDto } from '../api/client';
+import { getSelectStyles } from '../styles/selectStyles';
 
 interface SelectOption {
   value: string;
@@ -117,80 +118,23 @@ const VideoForm: React.FC<VideoFormProps> = ({
     return <HStack spacing={1}>{stars}</HStack>;
   };
 
-  // Custom styles for react-select
-  const textColor = useColorModeValue('gray.900', 'gray.100');
-  const selectStyles = {
-    control: (base: any) => ({
-      ...base,
-      background: bgColor,
-      borderColor: borderColor,
-      borderRadius: 'xl',
-      transition: 'all 0.2s ease',
-      color: textColor,
-    }),
-    menu: (base: any) => ({
-      ...base,
-      background: bgColor,
-      borderRadius: 'xl',
-      zIndex: 2,
-      color: textColor,
-    }),
-    option: (base: any, state: any) => ({
-      ...base,
-      backgroundColor: state.isFocused
-        ? useColorModeValue('brand.100', 'brand.900')
-        : useColorModeValue('white', 'gray.700'),
-      color: textColor,
-      borderRadius: 'lg',
-    }),
-    multiValue: (base: any) => ({
-      ...base,
-      backgroundColor: useColorModeValue('blue.100', 'blue.900'),
-    }),
-    multiValueLabel: (base: any) => ({
-      ...base,
-      color: useColorModeValue('blue.900', 'blue.100'),
-      backgroundColor: 'transparent',
-    }),
-    multiValueRemove: (base: any) => ({
-      ...base,
-      color: useColorModeValue('blue.700', 'blue.200'),
-      '&:hover': {
-        backgroundColor: useColorModeValue('blue.200', 'blue.800'),
-        color: 'white',
-      },
-    }),
-    placeholder: (base: any) => ({
-      ...base,
-      color: useColorModeValue('gray.500', 'gray.400'),
-    }),
-    input: (base: any) => ({
-      ...base,
-      color: textColor,
-    }),
-    singleValue: (base: any) => ({
-      ...base,
-      color: textColor,
-    }),
-    indicatorSeparator: (base: any) => ({
-      ...base,
-      backgroundColor: useColorModeValue('gray.300', 'gray.600'),
-    }),
-    dropdownIndicator: (base: any) => ({
-      ...base,
-      color: useColorModeValue('gray.500', 'gray.400'),
-      '&:hover': {
-        color: textColor,
-      },
-    }),
-    clearIndicator: (base: any) => ({
-      ...base,
-      color: useColorModeValue('gray.500', 'gray.400'),
-      '&:hover': {
-        color: textColor,
-      },
-    }),
-  };
+  // Custom styles for react-select — all colors pre-computed here,
+  // NEVER call useColorModeValue inside the style callbacks.
+  const selectStyles = getSelectStyles({
+    bgColor: bgColor as string,
+    borderColor: borderColor as string,
+    textColor: useColorModeValue('#111827', '#f3f4f6'),
+    placeholderColor: useColorModeValue('#6b7280', '#9ca3af'),
+    mutedIconColor: useColorModeValue('#6b7280', '#9ca3af'),
+    separatorColor: useColorModeValue('#d1d5db', '#4b5563'),
+    optionFocusedBg: useColorModeValue('#e0f2fe', '#0c4a6e'),
+    optionDefaultBg: useColorModeValue('#ffffff', '#374151'),
+    multiValueBg: useColorModeValue('#dbeafe', '#1e3a5f'),
+    multiValueLabelColor: useColorModeValue('#1e3a8a', '#bfdbfe'),
+    multiValueRemoveColor: useColorModeValue('#1d4ed8', '#93c5fd'),
+    multiValueRemoveHoverBg: useColorModeValue('#93c5fd', '#1e40af'),
+    borderRadius: 'xl',
+  });
 
   return (
     <motion.div
