@@ -228,6 +228,24 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onFilterChange, initialFi
       ...base,
       color: textColor,
     }),
+    indicatorSeparator: (base: any) => ({
+      ...base,
+      backgroundColor: useColorModeValue('gray.300', 'gray.600'),
+    }),
+    dropdownIndicator: (base: any) => ({
+      ...base,
+      color: useColorModeValue('gray.500', 'gray.400'),
+      '&:hover': {
+        color: textColor,
+      },
+    }),
+    clearIndicator: (base: any) => ({
+      ...base,
+      color: useColorModeValue('gray.500', 'gray.400'),
+      '&:hover': {
+        color: textColor,
+      },
+    }),
   };
 
   return (
