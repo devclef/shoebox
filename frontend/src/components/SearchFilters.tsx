@@ -294,6 +294,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onFilterChange, initialFi
               value={selectedRating}
               onChange={(e) => setSelectedRating(e.target.value)}
               placeholder="Any rating"
+              bg={bgColor}
+              color={textColor}
             >
               <option value="1">1 star</option>
               <option value="2">2 stars</option>
@@ -397,6 +399,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onFilterChange, initialFi
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               placeholder="Default (Created Date)"
+              bg={bgColor}
+              color={textColor}
             >
               <option value="created_date">Created Date</option>
               <option value="duration">Duration</option>
@@ -411,6 +415,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onFilterChange, initialFi
             <ChakraSelect
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
+              bg={bgColor}
+              color={textColor}
             >
               <option value="ASC">Ascending</option>
               <option value="DESC">Descending</option>

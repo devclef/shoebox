@@ -359,6 +359,8 @@ const RatedVideosTimelinePage: React.FC = () => {
             <Select
               value={timePeriod}
               onChange={(e) => setTimePeriod(e.target.value)}
+              bg={bgColor}
+              color={useColorModeValue('gray.900', 'gray.100')}
             >
               {TIME_PERIODS.map(option => (
                 <option key={option.value} value={option.value}>
@@ -373,6 +375,8 @@ const RatedVideosTimelinePage: React.FC = () => {
             <Select
               value={grouping}
               onChange={(e) => setGrouping(e.target.value)}
+              bg={bgColor}
+              color={useColorModeValue('gray.900', 'gray.100')}
             >
               {GROUPING_OPTIONS.map(option => (
                 <option key={option.value} value={option.value}>

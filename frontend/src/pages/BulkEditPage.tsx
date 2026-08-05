@@ -471,6 +471,9 @@ const BulkEditPage: React.FC = () => {
                 placeholder="Select rating"
                 value={selectedRating?.toString() || ''}
                 onChange={(e) => setSelectedRating(e.target.value ? parseInt(e.target.value) : null)}
+                bg={bgColor}
+                color="gray.900"
+                _dark={{ color: "gray.100" }}
               >
                 <option value="1">1 Star</option>
                 <option value="2">2 Stars</option>

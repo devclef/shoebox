@@ -187,38 +187,6 @@ const theme = extendTheme({
         bg: 'brand.500',
         color: 'white',
       },
-      // Native <select>, <option>, and <datalist> need explicit styling for dark mode
-      // because browsers ignore inherited CSS custom properties for these elements.
-      select: {
-        bg: {
-          _light: 'white',
-          _dark: 'gray.800',
-        },
-        color: {
-          _light: 'gray.900',
-          _dark: 'gray.100',
-        },
-      },
-      option: {
-        bg: {
-          _light: 'white',
-          _dark: 'gray.800',
-        },
-        color: {
-          _light: 'gray.900',
-          _dark: 'gray.100',
-        },
-      },
-      datalist: {
-        bg: {
-          _light: 'white',
-          _dark: 'gray.800',
-        },
-        color: {
-          _light: 'gray.900',
-          _dark: 'gray.100',
-        },
-      },
     },
   },
   shadows: {
