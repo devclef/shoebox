@@ -187,6 +187,38 @@ const theme = extendTheme({
         bg: 'brand.500',
         color: 'white',
       },
+      // Native <select>, <option>, and <datalist> need explicit styling for dark mode
+      // because browsers ignore inherited CSS custom properties for these elements.
+      select: {
+        bg: {
+          _light: 'white',
+          _dark: 'gray.800',
+        },
+        color: {
+          _light: 'gray.900',
+          _dark: 'gray.100',
+        },
+      },
+      option: {
+        bg: {
+          _light: 'white',
+          _dark: 'gray.800',
+        },
+        color: {
+          _light: 'gray.900',
+          _dark: 'gray.100',
+        },
+      },
+      datalist: {
+        bg: {
+          _light: 'white',
+          _dark: 'gray.800',
+        },
+        color: {
+          _light: 'gray.900',
+          _dark: 'gray.100',
+        },
+      },
     },
   },
   shadows: {
@@ -279,6 +311,14 @@ const theme = extendTheme({
         field: {
           borderRadius: 'xl',
           transition: 'all 0.2s ease',
+          bg: {
+            _light: 'white',
+            _dark: 'gray.800',
+          },
+          color: {
+            _light: 'gray.900',
+            _dark: 'gray.100',
+          },
         },
       },
     },
@@ -288,10 +328,37 @@ const theme = extendTheme({
           field: {
             borderRadius: 'xl',
             transition: 'all 0.2s ease',
+            bg: {
+              _light: 'white',
+              _dark: 'gray.800',
+            },
+            color: {
+              _light: 'gray.900',
+              _dark: 'gray.100',
+            },
             _focus: {
               boxShadow: '0 0 0 2px brand.300',
               borderColor: 'brand.500',
             },
+            _dark: {
+              _focus: {
+                boxShadow: '0 0 0 2px brand.700',
+              },
+            },
+          },
+        },
+      },
+      baseStyle: {
+        field: {
+          borderRadius: 'xl',
+          transition: 'all 0.2s ease',
+          bg: {
+            _light: 'white',
+            _dark: 'gray.800',
+          },
+          color: {
+            _light: 'gray.900',
+            _dark: 'gray.100',
           },
         },
       },
@@ -302,9 +369,22 @@ const theme = extendTheme({
             field: {
               borderRadius: 'xl',
               transition: 'all 0.2s ease',
+              bg: {
+                _light: 'white',
+                _dark: 'gray.800',
+              },
+              color: {
+                _light: 'gray.900',
+                _dark: 'gray.100',
+              },
               _focus: {
                 boxShadow: '0 0 0 2px brand.300',
                 borderColor: 'brand.500',
+              },
+              _dark: {
+                _focus: {
+                  boxShadow: '0 0 0 2px brand.700',
+                },
               },
             },
           },
@@ -313,6 +393,14 @@ const theme = extendTheme({
         field: {
           borderRadius: 'xl',
           transition: 'all 0.2s ease',
+          bg: {
+            _light: 'white',
+            _dark: 'gray.800',
+          },
+          color: {
+            _light: 'gray.900',
+            _dark: 'gray.100',
+          },
         },
       },
     },
