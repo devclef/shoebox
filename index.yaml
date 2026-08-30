@@ -193,6 +193,22 @@ entries:
   shoebox-helm:
   - apiVersion: v2
     appVersion: latest
+    created: "2026-08-30T12:02:53.541318676Z"
+    description: A Helm chart for the Shoebox application - a digital shoebox for
+      your videos
+    digest: c2d75c2d3b9e522e129efeb78cf6fb5b20db5fd14ccf90451bccf5eaec06383c
+    keywords:
+    - video
+    - organizer
+    - shoebox
+    - archive
+    name: shoebox-helm
+    type: application
+    urls:
+    - https://github.com/devclef/shoebox/releases/download/shoebox-helm-0.0.22/shoebox-helm-0.0.22.tgz
+    version: 0.0.22
+  - apiVersion: v2
+    appVersion: latest
     created: "2025-06-07T13:16:15.266843741Z"
     description: A Helm chart for the Shoebox application - a digital shoebox for
       your videos
@@ -310,4 +326,4 @@ entries:
     urls:
     - https://github.com/slackspace-io/shoebox/releases/download/shoebox-helm-0.0.1/shoebox-helm-0.0.1.tgz
     version: 0.0.1
-generated: "2025-06-07T13:16:15.266919412Z"
+generated: "2026-08-30T12:02:53.541371254Z"
