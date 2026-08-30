@@ -52,7 +52,7 @@ The following table lists the configurable parameters of the Shoebox chart and t
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `image.repository` | Image repository | `ghcr.io/slackspace-io/shoebox` |
+| `image.repository` | Image repository | `ghcr.io/devclef/shoebox` |
 | `image.tag` | Image tag | `latest` |
 | `image.pullPolicy` | Image pull policy | `IfNotPresent` |
 | `imagePullSecrets` | Image pull secrets | `[]` |

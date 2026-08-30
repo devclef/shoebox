@@ -14,7 +14,7 @@ This page provides detailed instructions for deploying Shoebox on Kubernetes usi
 
 ```bash
 # Add the Shoebox Helm repository
-helm repo add shoebox https://slackspace-io.github.io/shoebox
+helm repo add shoebox https://devclef.github.io/shoebox
 helm repo update
 ```
 
@@ -122,7 +122,7 @@ helm install shoebox shoebox/shoebox \
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `image.repository` | Image repository | `ghcr.io/slackspace-io/shoebox` |
+| `image.repository` | Image repository | `ghcr.io/devclef/shoebox` |
 | `image.tag` | Image tag | `preview` |
 | `image.pullPolicy` | Image pull policy | `IfNotPresent` |
 | `imagePullSecrets` | Image pull secrets | `[]` |

@@ -17,7 +17,7 @@ The simplest way to run Shoebox is using Docker:
 
 ```bash
 # Pull the latest image
-docker pull ghcr.io/slackspace-io/shoebox:latest
+docker pull ghcr.io/devclef/shoebox:latest
 
 # Run the container
 docker run -d \
@@ -27,7 +27,7 @@ docker run -d \
   -v /path/to/thumbnails:/app/thumbnails \
   -v /path/to/data:/app/data \
   --name shoebox \
-  ghcr.io/slackspace-io/shoebox:latest
+  ghcr.io/devclef/shoebox:latest
 ```
 
 ### Docker Compose
@@ -36,7 +36,7 @@ For a more complete setup, you can use Docker Compose:
 
 ```bash
 # Clone the repository
-git clone https://github.com/slackspace-io/shoebox.git
+git clone https://github.com/devclef/shoebox.git
 cd shoebox
 
 # Edit the docker-compose.yml file to configure your media source paths
@@ -54,7 +54,7 @@ If you want to run Shoebox for development:
 
 ```bash
 # Clone the repository
-git clone https://github.com/slackspace-io/shoebox.git
+git clone https://github.com/devclef/shoebox.git
 cd shoebox
 
 # Run the backend
