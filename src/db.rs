@@ -6,19 +6,35 @@ use tracing::info;
 use crate::config::Config;
 use crate::error::{AppError, Result};
 
+const PG_URL_EXAMPLE: &str = "postgresql://user:password@localhost:5432/shoebox";
+
 pub async fn init_db(config: &Config) -> Result<Pool<Postgres>> {
-    let db_url = &config.database.url;
+    let db_url = config.database.url.trim();
     info!("Database URL: {}", db_url);
+
+    // Fail fast with an actionable message when DATABASE_URL is missing
+    if db_url.is_empty() || db_url == "not_set" {
+        return Err(AppError::ConfigError(format!(
+            "DATABASE_URL is not set. Shoebox requires a PostgreSQL connection URL, \
+             e.g. {PG_URL_EXAMPLE}."
+        )));
+    }
 
     // Check if this is a PostgreSQL URL
     if db_url.starts_with("postgres:") || db_url.starts_with("postgresql:") {
         // Initialize PostgreSQL
         init_postgres(db_url).await
+    } else if db_url.starts_with("sqlite:") || db_url.starts_with("sqlite3:") {
+        Err(AppError::ConfigError(format!(
+            "SQLite is not yet supported. Please use a PostgreSQL connection URL, \
+             e.g. {PG_URL_EXAMPLE}."
+        )))
     } else {
-        // If not a PostgreSQL URL, return an error
-        Err(AppError::ConfigError(
-            "Only PostgreSQL is supported. Please provide a valid PostgreSQL connection URL.".to_string()
-        ))
+        // Unrecognized URL scheme
+        Err(AppError::ConfigError(format!(
+            "Unsupported DATABASE_URL scheme ({db_url}). Only PostgreSQL is supported, \
+             e.g. {PG_URL_EXAMPLE}."
+        )))
     }
 }
 

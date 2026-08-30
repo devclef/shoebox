@@ -24,6 +24,6 @@ While other services focus on viewing and sharing, Shoebox focuses on organizati
 
 - **Backend**: Rust with Axum web framework
 - **Frontend**: React with TypeScript
-- **Database**: SQLite/PostgreSQL via SQLx
+- **Database**: PostgreSQL via SQLx (SQLite is not yet supported)
 - **Media Processing**: FFmpeg
 - **Deployment**: Docker/Kubernetes support

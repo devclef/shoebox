@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Backend**: Rust 2021, Axum 0.8, Tokio, SQLx 0.8
 - **Frontend**: React 18, TypeScript, Vite 6, Chakra UI 2
-- **Database**: PostgreSQL (primary), SQLite (in Cargo.toml but not officially supported)
+- **Database**: PostgreSQL (via SQLx; the sqlx `sqlite` feature is enabled in Cargo.toml but SQLite is not supported at runtime)
 - **Media Processing**: FFmpeg (system binary via `std::process::Command`)
 - **Deployment**: Docker, Docker Compose, Helm
 
@@ -156,7 +156,7 @@ pub struct AppState {
 
 ## Important Conventions
 
-1. **Database**: PostgreSQL only in production (SQLite in Cargo.toml for flexibility)
+1. **Database**: PostgreSQL only (SQLite is not supported at runtime)
 2. **UUIDs**: All IDs use `uuid::Uuid::new_v4().to_string()`
 3. **Error Handling**: `AppError` enum implements `IntoResponse` for Axum
 4. **FFmpeg**: Called as system binary via `std::process::Command` (no wrapper library)

@@ -133,7 +133,7 @@ helm install shoebox shoebox/shoebox \
 |-----------|-------------|---------|
 | `config.serverHost` | Host to bind the server | `0.0.0.0` |
 | `config.serverPort` | Port to bind the server | `3000` |
-| `config.databaseUrl` | Database URL (SQLite) | `sqlite:/app/data/videos.db` |
+| `config.databaseUrl` | Database URL (PostgreSQL) | `postgres://postgres:postgres@postgres:5432/videos` |
 | `config.mediaSourcePaths` | Paths to scan for videos | `/mnt/videos` |
 | `config.thumbnailPath` | Path to store thumbnails | `/app/thumbnails` |
 | `config.exportBasePath` | Path for exported files | `/app/exports` |
@@ -166,10 +166,11 @@ helm install shoebox shoebox/shoebox \
 
 ## Examples
 
-### Using SQLite with Persistence
+### Using an External PostgreSQL with Persistence
 
 ```bash
 helm install shoebox shoebox/shoebox \
+  --set config.databaseUrl="postgres://postgres:postgres@my-postgres-host:5432/videos" \
   --set persistence.data.enabled=true \
   --set persistence.thumbnails.enabled=true \
   --set persistence.exports.enabled=true \

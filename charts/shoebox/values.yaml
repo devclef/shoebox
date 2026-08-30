@@ -131,7 +131,7 @@ config:
 
 # Persistence configuration
 persistence:
-  # Data directory for SQLite database
+  # Data directory for application data
   data:
     enabled: true
     size: 1Gi

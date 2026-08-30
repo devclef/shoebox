@@ -17,7 +17,7 @@ Shoebox can be configured using environment variables. Here are the main configu
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `DATABASE_URL` | Database connection URL | `sqlite:data.db` |
+| `DATABASE_URL` | PostgreSQL connection URL (required; SQLite is not yet supported) | `postgres://postgres:postgres@db:5432/videos` |
 | `DATABASE_MAX_CONNECTIONS` | Maximum number of database connections | `5` |
 
 ### Media Configuration
