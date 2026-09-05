@@ -9,6 +9,11 @@ updates:
     directory: "/frontend"
     schedule:
       interval: "weekly"
+    # Chakra UI 3 is a major breaking upgrade (theme rewrite + component API
+    # changes across the frontend). Re-enable once the migration lands.
+    ignore:
+      - dependency-name: "@chakra-ui/react"
+        versions: [">=3.0.0"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
