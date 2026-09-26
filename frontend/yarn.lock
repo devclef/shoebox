@@ -767,12 +767,12 @@ form-data@^4.0.6:
     hasown "^2.0.4"
     mime-types "^2.1.35"
 
-framer-motion@^13.4.0:
-  version "13.4.0"
-  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-13.4.0.tgz#2a7171731ce00028ea6c12527e8ee97427e26c86"
-  integrity sha512-HCpqKM9BTu6UYKtj0u6J1QNxojnnirNcghcSDZ+SkpiL3myxvtsgXPS3ZGEELC2eSma7YiA937rAEXtRyydSXQ==
+framer-motion@^13.4.1:
+  version "13.4.1"
+  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-13.4.1.tgz#cd0cb7ec7ec4ba125962fce4c8feffd2e3533499"
+  integrity sha512-6DsbU4hsNsokXkwSp3ezdMWMiv5yWzCcdjFgakkeUC6FVIK01Py8ToSzsXvBw8cYA5hff/oXFvZFU7ltbVyUYA==
   dependencies:
-    motion-dom "^13.3.0"
+    motion-dom "^13.4.1"
     motion-utils "^13.3.0"
     tslib "^2.4.0"
 
@@ -1009,10 +1009,10 @@ mime-types@^2.1.35:
   dependencies:
     mime-db "1.52.0"
 
-motion-dom@^13.3.0:
-  version "13.3.0"
-  resolved "https://registry.yarnpkg.com/motion-dom/-/motion-dom-13.3.0.tgz#e74a9cf5cea598e6c007fbfe05d29fe25a394d6a"
-  integrity sha512-AmAnB6pHdZ1vHGzWzuzteG6Q3j1lHKeX/lbST6jGlgm0cjvLUgaCk1xhOuPMOy5SgovN6wnnUdwFrkcsus7Ftg==
+motion-dom@^13.4.1:
+  version "13.4.4"
+  resolved "https://registry.yarnpkg.com/motion-dom/-/motion-dom-13.4.4.tgz#2b0b4de8f39452cfa75ec40d084e5d65660da1ca"
+  integrity sha512-z2qN3RUABSci4G7cr5aHTFhqPNCWJsEMMfRlzxqtANQsSCIbVJmHvMV288m5x7doEQBTYbRTWbKdztmquCn4Sw==
   dependencies:
     motion-utils "^13.3.0"
 
